@@ -16,7 +16,7 @@ cp \
 	deps/limine/limine.sys \
 	deps/limine/limine-cd-efi.bin \
 	deps/limine/limine-cd.bin \
-	root
+	root/boot
 
 cp kernel/kbin root/boot
 

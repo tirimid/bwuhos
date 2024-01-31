@@ -4,4 +4,4 @@ qemu-system-x86_64 \
 	--no-reboot \
 	-d int \
 	-D emu_log.txt \
-	-hda sucros.img
+	-hda bwuhos.iso
