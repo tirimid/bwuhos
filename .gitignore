@@ -3,6 +3,6 @@
 /kernel/lib
 /kernel/kbin
 /root/boot/kbin
-/root/limine-cd.bin
-/root/limine-cd-efi.bin
-/root/limine.sys
+/root/boot/limine-cd.bin
+/root/boot/limine-cd-efi.bin
+/root/boot/limine.sys
