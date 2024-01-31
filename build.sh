@@ -1,5 +1,10 @@
 ECHO_COLOR="\033[1;35m"
 
+echo -e "${ECHO_COLOR}[/] building dependency submodules\033[0m"
+cd deps
+./build.sh
+cd ..
+
 echo -e "${ECHO_COLOR}[/] building kernel\033[0m"
 cd kernel
 ./build.sh
