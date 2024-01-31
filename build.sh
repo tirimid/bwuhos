@@ -33,4 +33,4 @@ xorriso \
 	-o bwuhos.iso root
 
 echo -e "${ECHO_COLOR}[/] deploying bootloader\033[0m"
-./deps/limine/limine-deploy sucros.img
+./deps/limine/limine-deploy bwuhos.iso
