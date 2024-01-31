@@ -4,7 +4,7 @@ echo -e "${ECHO_COLOR}[/kernel] building C sources\033[0m"
 mincbuild build-conf/mcb_c.conf
 
 echo -e "${ECHO_COLOR}[/kernel] building assembly sources\033[0m"
-mincbuild build-conf/mcb_s.conf
+mincbuild build-conf/mcb_S.conf
 
 echo -e "${ECHO_COLOR}[/kernel] linking kernel binary\033[0m"
 x86_64-elf-gcc \
