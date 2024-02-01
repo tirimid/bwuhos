@@ -22,11 +22,11 @@ cp kernel/kbin root/boot
 
 xorriso \
 	-as mkisofs \
-	-b limine-cd.bin \
+	-b boot/limine-cd.bin \
 	-no-emul-boot \
 	-boot-load-size 4 \
 	-boot-info-table \
-	--efi-boot limine-cd-efi.bin \
+	--efi-boot boot/limine-cd-efi.bin \
 	-efi-boot-part \
 	--efi-boot-image \
 	--protective-msdos-label \

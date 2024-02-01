@@ -2,6 +2,7 @@
 /bwuhos.iso
 /kernel/lib
 /kernel/kbin
+/kernel/kbin.debug
 /root/boot/kbin
 /root/boot/limine-cd.bin
 /root/boot/limine-cd-efi.bin

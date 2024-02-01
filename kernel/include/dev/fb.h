@@ -13,8 +13,8 @@ struct fb_info {
 	struct {
 		uint64_t pitch;
 		uint16_t depth;
+		uint64_t mask_r, mask_g, mask_b, mask_all;
 		uint8_t shift_r, shift_g, shift_b;
-		uint8_t size_r, size_g, size_b;
 	} mem_info;
 };
 

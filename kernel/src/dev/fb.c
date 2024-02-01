@@ -13,6 +13,8 @@ static struct limine_framebuffer_request volatile fb_req = {
 	.revision = 0,
 };
 
+static uint64_t gen_mask(uint8_t size);
+
 static struct fb_info fbs[16];
 static size_t fb_cnt;
 
@@ -24,7 +26,8 @@ fb_init(void)
 	
 	for (size_t i = 0; i < resp_fb_cnt; ++i) {
 		struct limine_framebuffer *lmn_fb = fb_req.response->framebuffers[i];
-		fbs[fb_cnt++] = (struct fb_info){
+		struct fb_info *fb = &fbs[fb_cnt];
+		*fb = (struct fb_info){
 			.addr = lmn_fb->address,
 			.width = lmn_fb->width,
 			.height = lmn_fb->height,
@@ -34,11 +37,15 @@ fb_init(void)
 				.shift_r = lmn_fb->red_mask_shift,
 				.shift_g = lmn_fb->green_mask_shift,
 				.shift_b = lmn_fb->blue_mask_shift,
-				.size_r = lmn_fb->red_mask_size,
-				.size_g = lmn_fb->green_mask_size,
-				.size_b = lmn_fb->blue_mask_size,
+				.mask_r = gen_mask(lmn_fb->red_mask_size),
+				.mask_g = gen_mask(lmn_fb->green_mask_size),
+				.mask_b = gen_mask(lmn_fb->blue_mask_size),
 			},
 		};
+		fb->mem_info.mask_all |= fb->mem_info.mask_r << fb->mem_info.shift_r;
+		fb->mem_info.mask_all |= fb->mem_info.mask_g << fb->mem_info.shift_g;
+		fb->mem_info.mask_all |= fb->mem_info.mask_b << fb->mem_info.shift_b;
+		++fb_cnt;
 		
 		if (lmn_fb->memory_model != LIMINE_FRAMEBUFFER_RGB
 		    || lmn_fb->bpp > 64) {
@@ -90,6 +97,7 @@ int
 fb_get_pixel(uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, fb_id_t fb,
              uint64_t x, uint64_t y)
 {
+	// TODO: implement get pixel.
 	return GRC_OK;
 }
 
@@ -97,5 +105,26 @@ int
 fb_put_pixel(fb_id_t fb, uint64_t x, uint64_t y, uint8_t r, uint8_t g,
              uint8_t b)
 {
+	struct fb_info *info = &fbs[fb];
+	if (x >= info->width || y >= info->height)
+		return GRC_OUT_OF_BOUNDS;
+	
+	size_t off = info->mem_info.pitch * y + info->mem_info.depth / 8 * x;
+	uint64_t *px = (uint64_t *)(info->addr + off);
+	
+	*px &= ~info->mem_info.mask_all;
+	*px |= (r & info->mem_info.mask_r) << info->mem_info.shift_r;
+	*px |= (g & info->mem_info.mask_g) << info->mem_info.shift_g;
+	*px |= (b & info->mem_info.mask_b) << info->mem_info.shift_b;
+	
 	return GRC_OK;
+}
+
+static uint64_t
+gen_mask(uint8_t size)
+{
+	uint64_t mask = 0;
+	for (uint8_t i = 0; i < size; ++i)
+		mask |= 1 << i;
+	return mask;
 }
