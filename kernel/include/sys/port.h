@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 enum port {
-	P_PIC_MASTER_CMD = 0x20,
-	P_PIC_MASTER_DATA = 0x21,
-	P_PIC_SLAVE_CMD = 0xa0,
-	P_PIC_SLAVE_DATA = 0xa1,
+	P_PIC1_CMD = 0x20,
+	P_PIC1_DATA = 0x21,
+	P_PIC2_CMD = 0xa0,
+	P_PIC2_DATA = 0xa1,
 };
 
 uint8_t port_rd_8(enum port p);
