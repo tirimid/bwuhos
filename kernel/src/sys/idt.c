@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 #include "int/exception.h"
+#include "kutil.h"
 #include "sys/gdt.h"
 
 struct idt_ent {
@@ -22,6 +23,8 @@ static struct idt_ent idt[256];
 void
 idt_init(void)
 {
+	ku_log(LT_INFO, "initializing IDT");
+	
 	// it's not ideal to load these at runtime but the performance hit is
 	// absolutely negligible.
 	for (size_t i = 0; i < 32; ++i) {

@@ -1,5 +1,7 @@
 #include "sys/gdt.h"
 
+#include "kutil.h"
+
 #define GA_DPL(dpl) (dpl << 5)
 
 // use `GA_DPL()` macro for privilege level specification.
@@ -51,6 +53,8 @@ static struct gdt_ent gdt[] = {
 void
 gdt_init(void)
 {
+	ku_log(LT_INFO, "initializing GDT");
+	
 	struct gdtr gdtr = {
 		.size = sizeof(gdt) - 1,
 		.base = (uintptr_t)gdt,

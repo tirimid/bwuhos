@@ -9,6 +9,7 @@ typedef unsigned long long paddr_t;
 enum generic_rc {
 	GRC_OK = 0,
 	GRC_OUT_OF_BOUNDS,
+	GRC_FAULTY_DEV,
 };
 
 #endif

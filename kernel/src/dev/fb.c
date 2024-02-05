@@ -21,6 +21,8 @@ static size_t fb_cnt;
 void
 fb_init(void)
 {
+	ku_log(LT_INFO, "initializing framebuffer");
+	
 	fb_cnt = 0;
 	size_t resp_fb_cnt = fb_req.response->framebuffer_count;
 	
@@ -54,7 +56,7 @@ fb_init(void)
 	}
 	
 	if (!fb_cnt)
-		ku_log_err("found no usable framebuffers!");
+		ku_log(LT_ERR, "found no usable framebuffers!");
 }
 
 struct fb_info const *

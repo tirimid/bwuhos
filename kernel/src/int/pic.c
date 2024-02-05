@@ -1,5 +1,6 @@
 #include "int/pic.h"
 
+#include "kutil.h"
 #include "sys/port.h"
 
 enum icw1 {
@@ -20,6 +21,8 @@ enum icw4 {
 void
 pic_init(void)
 {
+	ku_log(LT_INFO, "initializing 8259 PIC");
+	
 	port_wr_8(P_PIC1_CMD, ICW1_ICW4 | ICW1_INIT);
 	port_wait();
 	port_wr_8(P_PIC2_CMD, ICW1_ICW4 | ICW1_INIT);
