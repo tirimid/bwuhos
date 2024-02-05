@@ -18,12 +18,6 @@ enum gdt_flag {
 	GF_GRAN = 0x80,
 };
 
-enum gdt_sel {
-	GS_KERNEL_NULL = 0x0,
-	GS_KERNEL_CODE = 0x8,
-	GS_KERNEL_DATA = 0x10,
-};
-
 struct gdt_ent {
 	uint16_t lim_0;
 	uint16_t base_0;
@@ -34,10 +28,7 @@ struct gdt_ent {
 } __attribute__((packed));
 
 static struct gdt_ent gdt[] = {
-	{
-		// kernel null.
-	},
-	{
+	[1] = {
 		// kernel code.
 		.lim_0 = 0xffff,
 		.base_0 = 0x0,
@@ -46,7 +37,7 @@ static struct gdt_ent gdt[] = {
 		.lim_1_flags = 0xf | GF_LONG_CODE | GF_GRAN,
 		.base_2 = 0x0,
 	},
-	{
+	[2] = {
 		// kernel data.
 		.lim_0 = 0xffff,
 		.base_0 = 0x0,
