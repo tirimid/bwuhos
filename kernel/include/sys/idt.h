@@ -3,10 +3,9 @@
 
 #include <stdint.h>
 
-enum gdt_sel {
-	GS_KERNEL_NULL = 0x0,
-	GS_KERNEL_CODE = 0x8,
-	GS_KERNEL_DATA = 0x10,
+enum idt_gate_type {
+	IGT_INT = 0x8e,
+	IGT_TRAP = 0x8f,
 };
 
 struct idtr {

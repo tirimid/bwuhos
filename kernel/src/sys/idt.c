@@ -1,9 +1,9 @@
 #include "sys/idt.h"
 
-#include "sys/gdt.h"
+#include <stddef.h>
 
-#define TA_GATE_INT 0x8e
-#define TA_GATE_TRAP 0x8f
+#include "int/exception.h"
+#include "sys/gdt.h"
 
 struct idt_ent {
 	uint16_t base_0;
@@ -15,7 +15,7 @@ struct idt_ent {
 	uint32_t _zero;
 } __attribute__((packed));
 
-static struct idt_ent mk_idt_ent(void *off, uint8_t type_attr);
+static struct idt_ent mk_idt_ent(uintptr_t addr, uint8_t type_attr);
 
 static struct idt_ent idt[256];
 
@@ -24,6 +24,10 @@ idt_init(void)
 {
 	// it's not ideal to load these at runtime but the performance hit is
 	// absolutely negligible.
+	for (size_t i = 0; i < 32; ++i) {
+		struct exception_spec const *es = &exception_spec_tab[i];
+		idt[i] = mk_idt_ent(es->addr, es->gate);
+	}
 	
 	struct idtr idtr = {
 		.size = sizeof(idt) - 1,
@@ -34,12 +38,12 @@ idt_init(void)
 }
 
 static struct idt_ent
-mk_idt_ent(void *off, uint8_t type_attr)
+mk_idt_ent(uintptr_t addr, uint8_t type_attr)
 {
 	return (struct idt_ent){
-		.base_0 = (uintptr_t)off & 0xffff,
-		.base_1 = ((uintptr_t)off & 0xffff0000) >> 16,
-		.base_2 = ((uintptr_t)off & 0xffffffff00000000) >> 32,
+		.base_0 = addr & 0xffff,
+		.base_1 = (addr & 0xffff0000) >> 16,
+		.base_2 = (addr & 0xffffffff00000000) >> 32,
 		.type_attr = type_attr,
 		.sel = GS_KERNEL_CODE,
 		.ist = 0,

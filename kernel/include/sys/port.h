@@ -18,4 +18,6 @@ void port_wr_8(enum port p, uint8_t b);
 void port_wr_16(enum port p, uint16_t w);
 void port_wr_32(enum port p, uint32_t l);
 
+void port_wait(void);
+
 #endif

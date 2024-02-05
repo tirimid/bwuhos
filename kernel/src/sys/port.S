@@ -43,4 +43,9 @@ port_wr_32:
 	out dx, eax
 	ret
 
+	.global port_wait
+port_wait:
+	outb 0x80, %al
+	ret
+
 	.endif
