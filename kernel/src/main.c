@@ -20,5 +20,9 @@ _start(void)
 	pic_init();
 	idt_init();
 	
+	__asm__ volatile ("\tmov $0x8, %rax\n"
+	                  "\tmov $0x989, %rdi\n"
+	                  "\tint $0x0\n");
+	
 	ku_hang();
 }
