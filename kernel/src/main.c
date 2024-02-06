@@ -3,6 +3,7 @@
 #include "dev/serial_port.h"
 #include "kutil.h"
 #include "mm/mlayt.h"
+#include "mm/pfa.h"
 #include "sys/gdt.h"
 #include "sys/idt.h"
 
@@ -13,16 +14,14 @@ _start(void)
 	// obviously this isn't ideal.
 	if (sp_init())
 		ku_hang();
-	
 	if (fb_init())
 		ku_hang();
-	
 	gdt_init();
 	pic_init();
 	idt_init();
-	
 	if (mlayt_init())
 		ku_hang();
+	pfa_init();
 	
 	ku_log(LT_INFO, "done initializing");
 	
