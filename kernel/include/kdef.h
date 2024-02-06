@@ -2,8 +2,8 @@
 #define KDEF_H__
 
 #define PAGE_SIZE 4096
-#define PADDR_NULL 0x0
+#define PHYS_ADDR_NULL 0x0
 
-typedef unsigned long long paddr_t;
+typedef unsigned long long phys_addr_t;
 
 #endif

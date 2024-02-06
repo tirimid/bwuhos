@@ -19,6 +19,9 @@ ku_log(enum log_type type, char const *msg, ...)
 	case LT_INFO:
 		sp_write_str("[info] ");
 		break;
+	case LT_DEBUG:
+		sp_write_str("[debug] ");
+		break;
 	case LT_ERR:
 		sp_write_str("[err] ");
 		break;

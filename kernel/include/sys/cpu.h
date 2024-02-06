@@ -3,11 +3,21 @@
 
 #include <stdint.h>
 
+#include "kdef.h"
+
 struct cpu_gen_regs {
 	uint64_t rax, rbx, rcx, rdx;
 	uint64_t rsi, rdi;
 	uint64_t rbp;
 	uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
 } __attribute__((packed));
+
+struct cpu_ctl_regs {
+	uint64_t cr0, cr2, cr3, cr4, cr8;
+	uint64_t efer;
+} __attribute((packed));
+
+struct cpu_ctl_regs cpu_get_ctl_regs(void);
+void cpu_load_cr3(phys_addr_t addr);
 
 #endif

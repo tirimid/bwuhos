@@ -5,13 +5,25 @@
 	
 	.macro DEF_ISR_HEAD name
 	
-	// the body for a certain name is assumed to exist.
-	// if not, then why would you even define a head for it?
 	.global \name\()_body
-	
 	.global \name\()_head
 \name\()_head:
 	PUSH_GEN_REGS
+	mov rdi, rsp
+	call \name\()_body
+	POP_GEN_REGS
+	iretq
+	
+	.endm
+	
+	.macro DEF_EX_HEAD name
+	
+	.global \name\()_body
+	.global \name\()_head
+\name\()_head:
+	PUSH_GEN_REGS
+	mov rdi, rsp
+	lea rsi, [rsp + 0x78]
 	call \name\()_body
 	POP_GEN_REGS
 	iretq

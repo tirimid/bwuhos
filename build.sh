@@ -8,6 +8,11 @@ cd ..
 echo -e "${ECHO_COLOR}[/] building kernel\033[0m"
 cd kernel
 ./build.sh
+if [ $? -ne 0 ]
+then
+	echo -e "${ECHO_COLOR}[/] kernel build failed\033[0m"
+	exit 1
+fi
 cd ..
 
 echo -e "${ECHO_COLOR}[/] building base filesystem\033[0m"
@@ -30,7 +35,7 @@ xorriso \
 	-efi-boot-part \
 	--efi-boot-image \
 	--protective-msdos-label \
-	-o bwuhos.iso root
+	-o bwuhos.iso root 2> /dev/null
 
 echo -e "${ECHO_COLOR}[/] deploying bootloader\033[0m"
-./deps/limine/limine-deploy bwuhos.iso
+./deps/limine/limine-deploy bwuhos.iso 2> /dev/null

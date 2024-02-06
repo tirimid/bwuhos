@@ -28,7 +28,7 @@ idt_init(void)
 	// it's not ideal to load these at runtime but the performance hit is
 	// absolutely negligible.
 	for (size_t i = 0; i < 32; ++i) {
-		struct exception_spec const *es = &exception_spec_tab[i];
+		struct ex_spec const *es = &ex_spec_tab[i];
 		idt[i] = mk_idt_ent(es->addr, es->gate);
 	}
 	

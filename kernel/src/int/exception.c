@@ -3,14 +3,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "kdump.h"
+#include "kutil.h"
 #include "sys/idt.h"
 #include "sys/cpu.h"
 
 #define NULL_ENT {0x0, 0x0}
-
-struct ex_frame {
-	uint64_t rip, cs, flags, rsp, ss;
-} __attribute__((packed));
 
 // exception handler heads defined in `int/exc.s`.
 void exception_0x0_head(void);
@@ -38,7 +36,7 @@ void exception_0x1c_head(void);
 void exception_0x1d_head(void);
 void exception_0x1e_head(void);
 
-struct exception_spec const exception_spec_tab[32] = {
+struct ex_spec const ex_spec_tab[32] = {
 	{(uintptr_t)exception_0x0_head, IGT_INT},
 	{(uintptr_t)exception_0x1_head, IGT_TRAP},
 	{(uintptr_t)exception_0x2_head, IGT_INT},
@@ -74,121 +72,125 @@ struct exception_spec const exception_spec_tab[32] = {
 };
 
 void
-exception_0x0_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x0_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x1_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x1_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x2_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x2_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x3_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x3_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x4_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x4_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x5_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x5_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x6_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x6_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x7_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x7_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x8_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0x8_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0x9_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x9_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0xa_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0xa_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0xb_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0xb_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0xc_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0xc_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0xd_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0xd_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0xe_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0xe_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
+{
+	ku_log(LT_ERR, "page fault");
+	kdump_gen_regs(gr);
+	kdump_exception_code(ef);
+	ku_hang();
+}
+
+void
+exception_0x10_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x10_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x11_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0x11_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0x12_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x12_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x13_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x13_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x14_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x14_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x15_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0x15_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0x1c_body(struct cpu_gen_regs *gr, struct ex_frame_no_code *ef)
 {
 }
 
 void
-exception_0x1c_body(struct cpu_gen_regs gr, struct ex_frame ef)
+exception_0x1d_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
 
 void
-exception_0x1d_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
-{
-}
-
-void
-exception_0x1e_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
+exception_0x1e_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 }
