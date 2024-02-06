@@ -26,7 +26,7 @@ kdump_gen_regs(struct cpu_gen_regs const *gr)
 void
 kdump_exception_no_code(struct ex_frame_no_code const *ef)
 {
-	ku_log(LT_ERR, "kernel exception dump");
+	ku_log(LT_ERR, "kernel exception dump (no code)");
 	ku_log(LT_ERR, "|  rip    0x%x = 0b%b", ef->rip, ef->rip);
 	ku_log(LT_ERR, "|  cs     0x%x = 0b%b", ef->cs, ef->cs);
 	ku_log(LT_ERR, "|  flags  0x%x = 0b%b", ef->flags, ef->flags);
@@ -37,7 +37,7 @@ kdump_exception_no_code(struct ex_frame_no_code const *ef)
 void
 kdump_exception_code(struct ex_frame_code const *ef)
 {
-	ku_log(LT_ERR, "kernel exception dump");
+	ku_log(LT_ERR, "kernel exception dump (code)");
 	ku_log(LT_ERR, "|  e      0x%x = 0b%b", ef->e, ef->e);
 	ku_log(LT_ERR, "|  rip    0x%x = 0b%b", ef->rip, ef->rip);
 	ku_log(LT_ERR, "|  cs     0x%x = 0b%b", ef->cs, ef->cs);

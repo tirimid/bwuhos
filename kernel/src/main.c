@@ -33,18 +33,20 @@ _start(void)
 	struct cpu_ctl_regs cr = cpu_get_ctl_regs();
 	phys_addr_t ppg = pmm_alloc();
 	void *vpg0 = 0xffffff90000;
-	void *vpg1 = 0xffffff20000;
+	void *vpg1 = 0xffffff70000;
+	void *vpg2 = 0x1fff000;
 	
-	*(uint32_t *)vpg0 = 0xdeadbeef;
-	
+	vmm_map(cr.cr3, ppg, (void *)ppg, VF_RW);
 	vmm_map(cr.cr3, ppg, vpg0, VF_RW);
 	vmm_map(cr.cr3, ppg, vpg1, VF_RW);
+	vmm_map(cr.cr3, ppg, vpg2, VF_RW);
 	
 	*(uint32_t *)vpg0 = 0xdeadbeef;
 	
-	ku_log(LT_DEBUG, "ppg = 0x%x", ppg);
+	ku_log(LT_DEBUG, "ppg (0x%x) = 0x%x", ppg, *(uint32_t *)ppg);
 	ku_log(LT_DEBUG, "vpg0 (0x%x) = 0x%x", vpg0, *(uint32_t *)vpg0);
 	ku_log(LT_DEBUG, "vpg1 (0x%x) = 0x%x", vpg1, *(uint32_t *)vpg1);
+	ku_log(LT_DEBUG, "vpg2 (0x%x) = 0x%x", vpg2, *(uint32_t *)vpg2);
 	
 	pmm_free(ppg);
 	
