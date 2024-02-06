@@ -1,4 +1,4 @@
-ECHO_COLOR="\033[1;35m"
+ECHO_COLOR="\033[1;32m"
 
 echo -e "${ECHO_COLOR}[/kernel] building C sources\033[0m"
 mincbuild -rv build-conf/mcb_c.conf

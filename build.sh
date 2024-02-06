@@ -1,4 +1,4 @@
-ECHO_COLOR="\033[1;35m"
+ECHO_COLOR="\033[1;32m"
 
 echo -e "${ECHO_COLOR}[/] building dependency submodules\033[0m"
 cd deps

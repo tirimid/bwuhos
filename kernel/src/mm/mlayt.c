@@ -2,11 +2,10 @@
 
 #include "limine.h"
 
+#include "kdef.h"
 #include "kutil.h"
 
-#define MAX_ML_ENTS 32
-
-static struct mlayt_ent ml_ents[MAX_ML_ENTS];
+static struct mlayt_ent ml_ents[MLAYT_MAX_ENTS];
 static size_t ml_size;
 
 static struct limine_memmap_request volatile mem_map_req = {
@@ -22,10 +21,13 @@ mlayt_init(void)
 	ml_size = 0;
 	size_t resp_ent_cnt = mem_map_req.response->entry_count;
 	
-	for (size_t i = 0; i < resp_ent_cnt && ml_size < MAX_ML_ENTS; ++i) {
+	for (size_t i = 0; i < resp_ent_cnt && ml_size < MLAYT_MAX_ENTS; ++i) {
 		struct limine_memmap_entry const *lmn_ent = mem_map_req.response->entries[i];
-		if (lmn_ent->type != LIMINE_MEMMAP_USABLE)
+		
+		if (lmn_ent->type != LIMINE_MEMMAP_USABLE
+		    || lmn_ent->length < 0x10 * PAGE_SIZE) {
 			continue;
+		}
 		
 		ml_ents[ml_size++] = (struct mlayt_ent){
 			.base = lmn_ent->base,

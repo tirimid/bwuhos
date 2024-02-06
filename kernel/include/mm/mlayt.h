@@ -5,6 +5,8 @@
 
 #include "kdef.h"
 
+#define MLAYT_MAX_ENTS 32
+
 struct mlayt_ent {
 	paddr_t base;
 	size_t size;
