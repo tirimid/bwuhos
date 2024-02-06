@@ -15,6 +15,7 @@ struct bitmap {
 };
 
 static void bm_feed_stk(void);
+static size_t bm_find_first_free(struct bitmap const *bm, size_t start);
 
 static size_t page_bm_cnt;
 static struct bitmap page_bms[MLAYT_MAX_ENTS];
@@ -40,6 +41,9 @@ pfa_init(void)
 			.npage = npage_total - npage_bm,
 		};
 	}
+	
+	page_stk_size = 0;
+	bm_feed_stk();
 }
 
 bool
@@ -77,23 +81,56 @@ pfa_alloc(void)
 void
 pfa_free(paddr_t addr)
 {
-	// NOTE: remember to return if no freeing is necessary.
+	// TODO: fix not working code.
+	
+	addr &= ~(PAGE_SIZE - 1);
+	
+	struct bitmap *bm;
+	for (size_t i = 0; i < page_bm_cnt; ++i) {
+		bm = &page_bms[i];
+		if (bm->base <= addr && addr < bm->base + PAGE_SIZE * bm->npage)
+			goto found;
+	}
+	return;
+found:;
+	size_t ind = (addr - bm->base) / PAGE_SIZE;
+	size_t byte = ind / 8, bit = ind % 8;
+	
+	bm->data[byte] &= ~(1 << bit);
+	bm->first_free = ind;
 }
 
 static void
 bm_feed_stk(void)
 {
-	for (size_t i = 0; i < page_bm_cnt; ++i) {
+	for (size_t i = 0; i < page_bm_cnt && page_stk_size < PAGE_STK_CAP; ++i) {
 		struct bitmap *bm = &page_bms[i];
-		for (size_t j = 0; j < bm->npage; ++j) {
-			if (page_stk_size >= PAGE_STK_CAP)
-				return;
-			
+		
+		for (size_t j = bm->first_free; j < bm->npage; ++j) {
 			size_t byte = j / 8, bit = j % 8;
 			if (!(bm->data[byte] & 1 << bit)) {
 				bm->data[byte] |= 1 << bit;
 				page_stk[page_stk_size++] = bm->base + PAGE_SIZE * j;
 			}
+			
+			if (page_stk_size >= PAGE_STK_CAP)
+				break;
 		}
+		
+		bm->first_free = bm_find_first_free(bm, bm->first_free + 1);
 	}
+}
+
+static size_t
+bm_find_first_free(struct bitmap const *bm, size_t start)
+{
+	size_t free;
+	
+	for (free = start; free < bm->npage; ++free) {
+		size_t byte = free / 8, bit = free % 8;
+		if (!(bm->data[byte] & 1 << bit))
+			break;
+	}
+	
+	return free;
 }

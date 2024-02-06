@@ -26,7 +26,9 @@ _start(void)
 	ku_log(LT_INFO, "done initializing");
 	
 	for (size_t i = 0; i < 15; ++i) {
-		ku_log(LT_INFO, "allocated 0x%x", pfa_alloc());
+		paddr_t addr = pfa_alloc();
+		ku_log(LT_INFO, "allocated 0x%x", addr);
+		pfa_free(addr);
 	}
 	
 	ku_hang();
