@@ -192,4 +192,3 @@ void
 exception_0x1e_body(struct cpu_gen_regs gr, uint64_t e, struct ex_frame ef)
 {
 }
-

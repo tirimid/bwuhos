@@ -1,28 +1,30 @@
 #include "dev/fb.h"
+#include "dev/pic.h"
 #include "dev/serial_port.h"
-#include "int/pic.h"
 #include "kutil.h"
+#include "mm/mlayt.h"
 #include "sys/gdt.h"
 #include "sys/idt.h"
 
 void
 _start(void)
 {
-	if (sp_init()) {
-		// serial port is necessary for debug logging.
-		// just hang if init fails.
-		// something better should eventually be done instead.
+	// just hang for now if init fails.
+	// obviously this isn't ideal.
+	if (sp_init())
 		ku_hang();
-	}
 	
-	fb_init();
+	if (fb_init())
+		ku_hang();
+	
 	gdt_init();
 	pic_init();
 	idt_init();
 	
-	__asm__ volatile ("\tmov $0x8, %rax\n"
-	                  "\tmov $0x989, %rdi\n"
-	                  "\tint $0x0\n");
+	if (mlayt_init())
+		ku_hang();
+	
+	ku_log(LT_INFO, "done initializing");
 	
 	ku_hang();
 }

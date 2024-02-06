@@ -18,7 +18,7 @@ struct fb_info {
 	} mem_info;
 };
 
-void fb_init(void);
+int fb_init(void);
 struct fb_info const *fb_get_best(void);
 struct fb_info const *fb_get_all(size_t *out_cnt);
 fb_id_t fb_get_id(struct fb_info const *info);

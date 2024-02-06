@@ -5,6 +5,7 @@
 #include "kdef.h"
 #include "kutil.h"
 
+#define MAX_FB_CNT 16
 #define FB_WEIGHT_WIDTH 1
 #define FB_WEIGHT_HEIGHT 1
 
@@ -15,10 +16,10 @@ static struct limine_framebuffer_request volatile fb_req = {
 
 static uint64_t gen_mask(uint8_t size);
 
-static struct fb_info fbs[16];
+static struct fb_info fbs[MAX_FB_CNT];
 static size_t fb_cnt;
 
-void
+int
 fb_init(void)
 {
 	ku_log(LT_INFO, "initializing framebuffer");
@@ -26,7 +27,7 @@ fb_init(void)
 	fb_cnt = 0;
 	size_t resp_fb_cnt = fb_req.response->framebuffer_count;
 	
-	for (size_t i = 0; i < resp_fb_cnt; ++i) {
+	for (size_t i = 0; i < resp_fb_cnt && fb_cnt < MAX_FB_CNT; ++i) {
 		struct limine_framebuffer *lmn_fb = fb_req.response->framebuffers[i];
 		struct fb_info *fb = &fbs[fb_cnt];
 		*fb = (struct fb_info){
@@ -55,8 +56,12 @@ fb_init(void)
 		}
 	}
 	
-	if (!fb_cnt)
+	if (!fb_cnt) {
 		ku_log(LT_ERR, "found no usable framebuffers!");
+		return 1;
+	}
+	
+	return 0;
 }
 
 struct fb_info const *
@@ -100,7 +105,7 @@ fb_get_pixel(uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, fb_id_t fb,
              uint64_t x, uint64_t y)
 {
 	// TODO: implement get pixel.
-	return GRC_OK;
+	return 1;
 }
 
 int
@@ -109,7 +114,7 @@ fb_put_pixel(fb_id_t fb, uint64_t x, uint64_t y, uint8_t r, uint8_t g,
 {
 	struct fb_info *info = &fbs[fb];
 	if (x >= info->width || y >= info->height)
-		return GRC_OUT_OF_BOUNDS;
+		return 1;
 	
 	size_t off = info->mem_info.pitch * y + info->mem_info.depth / 8 * x;
 	uint64_t *px = (uint64_t *)(info->addr + off);
@@ -119,7 +124,7 @@ fb_put_pixel(fb_id_t fb, uint64_t x, uint64_t y, uint8_t r, uint8_t g,
 	*px |= (g & info->mem_info.mask_g) << info->mem_info.shift_g;
 	*px |= (b & info->mem_info.mask_b) << info->mem_info.shift_b;
 	
-	return GRC_OK;
+	return 0;
 }
 
 static uint64_t

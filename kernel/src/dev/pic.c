@@ -1,4 +1,4 @@
-#include "int/pic.h"
+#include "dev/pic.h"
 
 #include "kutil.h"
 #include "sys/port.h"

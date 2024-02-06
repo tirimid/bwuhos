@@ -18,11 +18,11 @@ sp_init(void)
 	port_wr_8(P_COM1, 0xae);
 	
 	if (port_rd_8(P_COM1) != 0xae)
-		return GRC_FAULTY_DEV;
+		return 1;
 	
 	port_wr_8(P_COM1 + 4, 0xf);
 	
-	return GRC_OK;
+	return 0;
 }
 
 char
