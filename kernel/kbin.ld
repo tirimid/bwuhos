@@ -12,6 +12,9 @@ PHDRS
 SECTIONS
 {
 	. = 0xffffffff80000000;
+
+	K_START_VADDR__ = .;
+
 	.text : {
 		*(.text .text.*)
 	} :text
@@ -25,10 +28,13 @@ SECTIONS
 	.data : {
 		*(.data .data.*)
 	} :data
+
 	.bss : {
 		*(COMMON)
 		*(.bss .bss.*)
 	} :data
+
+	K_END_VADDR__ = .;
 
 	/DISCARD/ : {
 		*(.eh_frame)

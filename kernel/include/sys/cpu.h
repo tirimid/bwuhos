@@ -18,6 +18,6 @@ struct cpu_ctl_regs {
 } __attribute((packed));
 
 struct cpu_ctl_regs cpu_get_ctl_regs(void);
-void cpu_load_cr3(phys_addr_t addr);
+void cpu_switch_mem_ctx(phys_addr_t cr3, void const *stk_base, void (*post_load_jmp)(void));
 
 #endif

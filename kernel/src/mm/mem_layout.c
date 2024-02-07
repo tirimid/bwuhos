@@ -1,6 +1,6 @@
 #include "mm/mem_layout.h"
 
-#include "limine.h"
+#include <limine.h>
 
 #include "kdef.h"
 #include "kutil.h"
@@ -10,7 +10,7 @@ static size_t ml_size;
 
 static struct limine_memmap_request volatile mem_map_req = {
 	.id = LIMINE_MEMMAP_REQUEST,
-	.revision = 0,
+	.revision = 1,
 };
 
 int

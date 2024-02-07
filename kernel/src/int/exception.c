@@ -5,8 +5,8 @@
 
 #include "kdump.h"
 #include "kutil.h"
-#include "sys/idt.h"
 #include "sys/cpu.h"
+#include "sys/idt.h"
 
 #define NULL_ENT {0x0, 0x0}
 

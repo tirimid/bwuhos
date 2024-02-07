@@ -1,7 +1,7 @@
 [submodule "deps/limine"]
 	path = deps/limine
-	url = https://github.com/limine-bootloader/limine.git
-	branch = v3.0-branch-binary
+	url = https://github.com/limine-bootloader/limine
+	branch = v6.x-branch-binary
 [submodule "deps/font8x8"]
 	path = deps/font8x8
 	url = https://github.com/dhepper/font8x8.git

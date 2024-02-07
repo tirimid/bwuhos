@@ -4,6 +4,6 @@
 /kernel/kbin
 /kernel/kbin.debug
 /root/boot/kbin
-/root/boot/limine-cd.bin
-/root/boot/limine-cd-efi.bin
-/root/boot/limine.sys
+/root/boot/limine-bios-cd.bin
+/root/boot/limine-uefi-cd.bin
+/root/boot/limine-bios.sys

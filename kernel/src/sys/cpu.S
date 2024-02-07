@@ -24,9 +24,11 @@ cpu_get_ctl_regs:
 	
 	ret
 	
-	.global cpu_load_cr3
-cpu_load_cr3:
+	.global cpu_switch_mem_ctx
+cpu_switch_mem_ctx:
 	mov cr3, rdi
-	ret
+	mov rbp, rsi
+	mov rsp, rsi
+	jmp rdx
 	
 	.endif

@@ -18,24 +18,22 @@ cd ..
 echo -e "${ECHO_COLOR}[/] building base filesystem\033[0m"
 mkdir -p root/boot
 cp \
-	deps/limine/limine.sys \
-	deps/limine/limine-cd-efi.bin \
-	deps/limine/limine-cd.bin \
+	deps/limine/limine-bios.sys \
 	root/boot
 
 cp kernel/kbin root/boot
 
 xorriso \
 	-as mkisofs \
-	-b boot/limine-cd.bin \
+	-b boot/limine-bios-cd.bin \
 	-no-emul-boot \
 	-boot-load-size 4 \
 	-boot-info-table \
-	--efi-boot boot/limine-cd-efi.bin \
+	--efi-boot boot/limine-uefi-cd.bin \
 	-efi-boot-part \
 	--efi-boot-image \
 	--protective-msdos-label \
 	-o bwuhos.iso root 2> /dev/null
 
 echo -e "${ECHO_COLOR}[/] deploying bootloader\033[0m"
-./deps/limine/limine-deploy bwuhos.iso 2> /dev/null
+./deps/limine/limine bios-install bwuhos.iso 2> /dev/null
