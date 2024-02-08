@@ -1,5 +1,5 @@
-#ifndef INT_EXCEPTION_H__
-#define INT_EXCEPTION_H__
+#ifndef ISR_EXCEPTION_H__
+#define ISR_EXCEPTION_H__
 
 #include <stdint.h>
 

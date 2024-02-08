@@ -1,5 +1,5 @@
-	.ifndef INT_ISR_COMMON_S__
-	.equ INT_ISR_COMMON_S__, 1
+	.ifndef ISR_ISR_COMMON_S__
+	.equ ISR_ISR_COMMON_S__, 1
 	
 	.include "kdef.S"
 	

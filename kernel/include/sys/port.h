@@ -14,6 +14,10 @@ enum port {
 	// "less reliable" COM3-8 not included.
 	P_COM1 = 0x3f8,
 	P_COM2 = 0x2f8,
+	
+	// PCI.
+	P_PCI_CONF_ADDR = 0xcf8,
+	P_PCI_CONF_DATA = 0xcfc,
 };
 
 uint8_t port_rd_8(enum port p);

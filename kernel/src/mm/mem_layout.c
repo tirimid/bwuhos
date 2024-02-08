@@ -46,8 +46,6 @@ meml_init(void)
 struct meml_ent const *
 meml_get(size_t *out_size)
 {
-	if (out_size)
-		*out_size = ml_size;
-	
+	*out_size = ml_size;
 	return ml_ents;
 }

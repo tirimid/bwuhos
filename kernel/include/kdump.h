@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 
-#include "int/exception.h"
+#include "isr/exception.h"
 #include "sys/cpu.h"
 
 void kdump_gen_regs(struct cpu_gen_regs const *gr);
+void kdump_ctl_regs(struct cpu_ctl_regs const *cr);
 void kdump_exception_no_code(struct ex_frame_no_code const *ef);
 void kdump_exception_code(struct ex_frame_code const *ef);
 

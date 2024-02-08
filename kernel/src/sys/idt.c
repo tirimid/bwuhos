@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "int/exception.h"
+#include "isr/exception.h"
 #include "kutil.h"
 #include "sys/gdt.h"
 

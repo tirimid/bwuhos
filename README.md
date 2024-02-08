@@ -2,10 +2,10 @@
 
 ## Introduction
 
-This is a small hobbyist operating system project. Nothing complex, and actually
-it won't even be usable for general purpose computing. It will be have a basic
-filesystem, some utilities, a shell, a kernel, and everything will run in kernel
-space.
+This is a small hobbyist x86_64 operating system project. Nothing complex, and
+actually it won't even be usable for general purpose computing. It will be have
+a basic filesystem, some utilities, a shell, a kernel, and everything will run
+in kernel space.
 
 Nothing is implemented yet.
 
@@ -31,7 +31,7 @@ This will generate an ISO image which you can use the same way as any other.
 
 Do not run bwuhos on real hardware, it probably won't even work. And if it does,
 I make no promises about how safe it is to run it. After building the project,
-you can should run the `run.sh` script as follows:
+you should run the `run.sh` script as follows:
 
 ```
 $ ./run.sh &

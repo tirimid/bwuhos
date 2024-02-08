@@ -1,7 +1,7 @@
-	.ifndef INT_EXCEPTION_S__
-	.set INT_EXCEPTION_S__, 1
+	.ifndef ISR_EXCEPTION_S__
+	.set ISR_EXCEPTION_S__, 1
 	
-	.include "int/isr_common.S"
+	.include "isr/isr_common.S"
 	
 	DEF_EX_HEAD exception_0x0
 	DEF_EX_HEAD exception_0x1

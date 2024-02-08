@@ -1,4 +1,4 @@
-#include "int/exception.h"
+#include "isr/exception.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -145,8 +145,13 @@ void
 exception_0xe_body(struct cpu_gen_regs *gr, struct ex_frame_code *ef)
 {
 	ku_log(LT_ERR, "page fault");
+	
+	struct cpu_ctl_regs cr = cpu_get_ctl_regs();
+	
 	kdump_gen_regs(gr);
+	kdump_ctl_regs(&cr);
 	kdump_exception_code(ef);
+	
 	ku_hang();
 }
 

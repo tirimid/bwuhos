@@ -24,6 +24,18 @@ kdump_gen_regs(struct cpu_gen_regs const *gr)
 }
 
 void
+kdump_ctl_regs(struct cpu_ctl_regs const *cr)
+{
+	ku_log(LT_ERR, "kernel control register dump");
+	ku_log(LT_ERR, "|  cr0   0x%x = 0b%b", cr->cr0, cr->cr0);
+	ku_log(LT_ERR, "|  cr2   0x%x = 0b%b", cr->cr2, cr->cr2);
+	ku_log(LT_ERR, "|  cr3   0x%x = 0b%b", cr->cr3, cr->cr3);
+	ku_log(LT_ERR, "|  cr4   0x%x = 0b%b", cr->cr4, cr->cr4);
+	ku_log(LT_ERR, "|  cr8   0x%x = 0b%b", cr->cr8, cr->cr8);
+	ku_log(LT_ERR, ":  efer  0x%x = 0b%b", cr->efer, cr->efer);
+}
+
+void
 kdump_exception_no_code(struct ex_frame_no_code const *ef)
 {
 	ku_log(LT_ERR, "kernel exception dump (no code)");
