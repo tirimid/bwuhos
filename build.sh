@@ -18,6 +18,8 @@ cd ..
 echo -e "${ECHO_COLOR}[/] building base filesystem\033[0m"
 mkdir -p root/boot
 cp \
+	deps/limine/limine-bios-cd.bin \
+	deps/limine/limine-uefi-cd.bin \
 	deps/limine/limine-bios.sys \
 	root/boot
 
