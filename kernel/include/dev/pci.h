@@ -70,8 +70,15 @@ struct pci_hdr_02h {
 	uint32_t pccard_legacy_base;
 } __attribute__((packed));
 
+union pci_hdr {
+	struct pci_hdr_common common;
+	struct pci_hdr_00h type_00h;
+	struct pci_hdr_01h type_01h;
+	struct pci_hdr_02h type_02h;
+};
+
 uint32_t pci_conf_rd_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg);
-int pci_conf_rd_hdr(void *out, uint8_t bus, uint8_t dev, uint8_t fn);
-int pci_conf_find(void *out, uint8_t class, uint8_t subclass, uint8_t prog_if, size_t which);
+int pci_conf_rd_hdr(union pci_hdr *out, uint8_t bus, uint8_t dev, uint8_t fn);
+int pci_conf_find(union pci_hdr *out, uint8_t class, uint8_t subclass, uint8_t prog_if, size_t which);
 
 #endif

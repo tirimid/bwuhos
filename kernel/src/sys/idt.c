@@ -1,7 +1,5 @@
 #include "sys/idt.h"
 
-#include <stddef.h>
-
 #include "isr/exception.h"
 #include "kutil.h"
 #include "sys/gdt.h"
@@ -29,7 +27,7 @@ idt_init(void)
 	// absolutely negligible.
 	for (size_t i = 0; i < 32; ++i) {
 		struct ex_spec const *es = &ex_spec_tab[i];
-		idt[i] = mk_idt_ent(es->addr, es->gate);
+		idt_set_isr(i, es->addr, es->gate);
 	}
 	
 	struct idtr idtr = {
@@ -38,6 +36,12 @@ idt_init(void)
 	};
 	
 	idt_load(&idtr);
+}
+
+void
+idt_set_isr(size_t vec, uintptr_t addr, uint8_t type_attr)
+{
+	idt[vec] = mk_idt_ent(addr, type_attr);
 }
 
 static struct idt_ent

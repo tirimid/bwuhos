@@ -4,9 +4,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dev/pci.h"
 #include "kdef.h"
 
-// implemented according to AHCI 1.3.1 and serial ATA 2.6.
+// implemented according to AHCI 1.3.1.
+// do not use the datastructures directly, only use them through pointer
+// indirection to access existing memory in an organized manner.
 
 enum ahci_cmd_hdr_flags {
 	ACHF_ATAPI = 0x20,
@@ -15,19 +18,6 @@ enum ahci_cmd_hdr_flags {
 	ACHF_RESET = 0x100,
 	ACHF_BIST = 0x200,
 	ACHF_OK_CLR_BUSY = 0x400,
-};
-
-enum ahci_fis_type {
-	AFT_REG_H2D = 0x27,
-	AFT_REG_D2H = 0x34,
-	AFT_DMA_ACTIVATE_D2H = 0x39,
-	AFT_DMA_SETUP_BIDIR = 0x41,
-	AFT_DATA_BIDIR = 0x46,
-	AFT_BIST_ACTIVATE_BIDIR = 0x58,
-	AFT_PIO_SETUP_D2H = 0x5f,
-	AFT_PIO_SET_DEV_BITS_D2H = 0xa1,
-	
-	// reserved / vendor-specific fields according to SATA 2.6 not included.
 };
 
 struct ahci_port {
@@ -87,19 +77,35 @@ struct ahci_cmd_hdr {
 	uint32_t _res[4];
 } __attribute__((packed));
 
+struct ahci_phys_reg_desc {
+	uint32_t data_base;
+	uint32_t data_base_upper;
+	uint32_t _res;
+	uint32_t data_byte_cnt_int;
+} __attribute__((packed));
+
 struct ahci_cmd_tab {
+	uint8_t cmd_fis[64];
+	uint8_t atapi_cmd[16];
+	uint8_t _res[48];
+	struct ahci_phys_reg_desc prd_tab[65535];
 } __attribute__((packed));
 
 // `which` is the parameter passed to `pci_conf_find()` to determine which of
 // possibly multiple AHCI HBAs in the system to use.
 struct ahci_hba *ahci_get_hba_base(size_t which);
 
-struct ahci_port *ahci_get_port(struct ahci_hba *hba, uint8_t port);
 struct ahci_recv_fis *ahci_get_recv_fis(struct ahci_port *port);
 struct ahci_cmd_hdr *ahci_get_cmd_list(struct ahci_port *port);
 struct ahci_cmd_tab *ahci_get_cmd_tab(struct ahci_cmd_hdr *list, uint8_t tab);
 
-int ahci_rd(phys_addr_t dst, struct ahci_port *port, blk_addr_t src, size_t nsector);
-int ahci_wr(blk_addr_t dst, struct ahci_port *port, phys_addr_t src, size_t nsector);
+int ahci_hba_init(struct ahci_hba *hba);
+void ahci_hba_init_pci(struct pci_hdr_00h *hba_hdr);
+int ahci_port_init(struct ahci_port *port, struct ahci_hba *hba);
+void ahci_port_start_cmd(struct ahci_port *port);
+void ahci_port_stop_cmd(struct ahci_port *port);
+
+int ahci_port_rd(phys_addr_t dst, struct ahci_port *port, blk_addr_t src, size_t nsector);
+int ahci_port_wr(blk_addr_t dst, struct ahci_port *port, phys_addr_t src, size_t nsector);
 
 #endif

@@ -112,6 +112,21 @@ vmm_unmap(phys_addr_t pml4, void const *vaddr)
 	pt[pi.pg] = 0;
 }
 
+void
+vmm_map_cr3(phys_addr_t paddr, void const *vaddr, uint8_t flags)
+{
+	// TODO: cache `cr3` for map and unmap.
+	struct cpu_ctl_regs cr = cpu_get_ctl_regs();
+	vmm_map(cr.cr3, paddr, vaddr, flags);
+}
+
+void
+vmm_unmap_cr3(void const *vaddr)
+{
+	struct cpu_ctl_regs cr = cpu_get_ctl_regs();
+	vmm_unmap(cr.cr3, vaddr);
+}
+
 static struct page_index
 vaddr_to_pg_ind(void const *vaddr)
 {

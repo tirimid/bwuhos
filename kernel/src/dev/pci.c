@@ -27,7 +27,7 @@ pci_conf_rd_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg)
 }
 
 int
-pci_conf_rd_hdr(void *out, uint8_t bus, uint8_t dev, uint8_t fn)
+pci_conf_rd_hdr(union pci_hdr *out, uint8_t bus, uint8_t dev, uint8_t fn)
 {
 	uint32_t vendor_id_dev_id = pci_conf_rd_32(bus, dev, fn, 0);
 	if ((vendor_id_dev_id & 0xffff) == VENDOR_NONE)
@@ -39,7 +39,7 @@ pci_conf_rd_hdr(void *out, uint8_t bus, uint8_t dev, uint8_t fn)
 		*((uint32_t *)out + reg / 4) = pci_conf_rd_32(bus, dev, fn, reg);
 	
 	// read type-specific PCI header.
-	struct pci_hdr_common const *common = out;
+	struct pci_hdr_common const *common = &out->common;
 	size_t hdr_size = hdr_sizes[common->hdr_type & 0x7f];
 	
 	for (size_t reg = sizeof(struct pci_hdr_common); reg < hdr_size; reg += 4)
@@ -49,14 +49,14 @@ pci_conf_rd_hdr(void *out, uint8_t bus, uint8_t dev, uint8_t fn)
 }
 
 int
-pci_conf_find(void *out, uint8_t class, uint8_t subclass, uint8_t prog_if,
-              size_t which)
+pci_conf_find(union pci_hdr *out, uint8_t class, uint8_t subclass,
+              uint8_t prog_if, size_t which)
 {
 	uint8_t buf[256];
 	size_t nfound = 0;
 	for (unsigned bus = 0; bus < 256; ++bus) {
 		for (unsigned dev = 0; dev < 32; ++dev) {
-			if (pci_conf_rd_hdr(buf, bus, dev, 0))
+			if (pci_conf_rd_hdr((union pci_hdr *)buf, bus, dev, 0))
 				continue;
 			
 			struct pci_hdr_common const *common = (struct pci_hdr_common *)buf;
@@ -73,7 +73,7 @@ pci_conf_find(void *out, uint8_t class, uint8_t subclass, uint8_t prog_if,
 				continue;
 			
 			for (unsigned fn = 1; fn < 8; ++fn) {
-				if (pci_conf_rd_hdr(buf, bus, dev, fn))
+				if (pci_conf_rd_hdr((union pci_hdr *)buf, bus, dev, fn))
 					continue;
 				
 				common = (struct pci_hdr_common *)buf;

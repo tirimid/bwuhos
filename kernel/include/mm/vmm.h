@@ -19,6 +19,8 @@ void vmm_init(void (*post_init_jmp)(void));
 phys_addr_t vmm_mk_map(void);
 void vmm_map(phys_addr_t pml4, phys_addr_t paddr, void const *vaddr, uint8_t flags);
 void vmm_unmap(phys_addr_t pml4, void const *vaddr);
+void vmm_map_cr3(phys_addr_t paddr, void const *vaddr, uint8_t flags);
+void vmm_unmap_cr3(void const *vaddr);
 void vmm_invlpg(void const *vaddr);
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef SYS_IDT_H__
 #define SYS_IDT_H__
 
+#include <stddef.h>
 #include <stdint.h>
 
 enum idt_gate_type {
@@ -15,5 +16,6 @@ struct idtr {
 
 void idt_load(struct idtr const *idtr);
 void idt_init(void);
+void idt_set_isr(size_t vec, uintptr_t addr, uint8_t type_attr);
 
 #endif
