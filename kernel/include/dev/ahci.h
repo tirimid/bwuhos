@@ -1,4 +1,4 @@
-#ifndef DEV_IDE_H__
-#define DEV_IDE_H__
+#ifndef DEV_AHCI_H__
+#define DEV_AHCI_H__
 
 #endif

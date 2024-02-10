@@ -8,6 +8,7 @@
 
 static void fmt_log_x(uint64_t n);
 static void fmt_log_b(uint64_t n);
+static void fmt_log_u(uint64_t n);
 
 void
 ku_log(enum log_type type, char const *msg, ...)
@@ -19,11 +20,14 @@ ku_log(enum log_type type, char const *msg, ...)
 	case LT_INFO:
 		sp_write_str("[info] ");
 		break;
-	case LT_DEBUG:
-		sp_write_str("[debug] ");
+	case LT_WARN:
+		sp_write_str("[warn] ");
 		break;
 	case LT_ERR:
 		sp_write_str("[err] ");
+		break;
+	case LT_DEBUG:
+		sp_write_str("[debug] ");
 		break;
 	}
 	
@@ -46,6 +50,9 @@ ku_log(enum log_type type, char const *msg, ...)
 		case 'b':
 			fmt_log_b(va_arg(args, uint64_t));
 			break;
+		case 'u':
+			fmt_log_u(va_arg(args, uint64_t));
+			break;
 		default:
 			break;
 		}
@@ -54,6 +61,13 @@ ku_log(enum log_type type, char const *msg, ...)
 	sp_write_ch('\n');
 	
 	va_end(args);
+}
+
+void
+ku_smc_8(void *dst, void const *src, size_t n)
+{
+	for (size_t i = 0; i < n; ++i)
+		*((uint8_t *)dst + i) = *((uint8_t *)src + i);
 }
 
 static void
@@ -94,4 +108,10 @@ fmt_log_b(uint64_t n)
 		text[nch - i - 1] = n >> i & 0x1 ? '1' : '0';
 	
 	sp_write_str(text);
+}
+
+static void
+fmt_log_u(uint64_t n)
+{
+	// TODO: implement unsigned decimal formatting.
 }

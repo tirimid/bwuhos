@@ -41,5 +41,10 @@ init_stage_2(void)
 {
 	ku_log(LT_INFO, "reached kernel init stage 2");
 	
+	// TEST: find SATA disk.
+	// prints 0 on success.
+	struct pci_hdr_00h disk;
+	ku_log(LT_DEBUG, "%x", pci_conf_find(&disk, 0x1, 0x6, 0x1, 0));
+	
 	ku_hang();
 }
