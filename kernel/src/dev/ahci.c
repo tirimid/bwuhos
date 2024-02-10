@@ -118,6 +118,9 @@ ahci_port_start_cmd(struct ahci_port *port)
 	// spin until status 0h, idle.
 	while (port->cmd >> 28)
 		;
+	
+	port->cmd |= 0x10; // set fis receive enable.
+	port->cmd |= 0x1; // set clear start.
 }
 
 void
