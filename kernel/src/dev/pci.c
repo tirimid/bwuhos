@@ -26,6 +26,11 @@ pci_conf_rd_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg)
 	return port_rd_32(P_PCI_CONF_DATA);
 }
 
+void
+pci_conf_wr_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg)
+{
+}
+
 int
 pci_conf_rd_hdr(union pci_hdr *out, uint8_t bus, uint8_t dev, uint8_t fn)
 {
@@ -46,6 +51,12 @@ pci_conf_rd_hdr(union pci_hdr *out, uint8_t bus, uint8_t dev, uint8_t fn)
 		*((uint32_t *)out + reg / 4) = pci_conf_rd_32(bus, dev, fn, reg);
 	
 	return 0;
+}
+
+void
+pci_conf_wr_hdr(union pci_hdr *out, uint8_t type, uint8_t bus, uint8_t dev,
+                uint8_t fn)
+{
 }
 
 int

@@ -78,7 +78,9 @@ union pci_hdr {
 };
 
 uint32_t pci_conf_rd_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg);
+void pci_conf_wr_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg);
 int pci_conf_rd_hdr(union pci_hdr *out, uint8_t bus, uint8_t dev, uint8_t fn);
+void pci_conf_wr_hdr(union pci_hdr *out, uint8_t type, uint8_t bus, uint8_t dev, uint8_t fn);
 int pci_conf_find(union pci_hdr *out, uint8_t class, uint8_t subclass, uint8_t prog_if, size_t which);
 
 #endif

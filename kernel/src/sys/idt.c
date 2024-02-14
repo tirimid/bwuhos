@@ -23,8 +23,8 @@ idt_init(void)
 {
 	ku_log(LT_INFO, "initializing IDT");
 	
-	// it's not ideal to load these at runtime but the performance hit is
-	// absolutely negligible.
+	// it's not ideal to load these ISRs at runtime but the performance hit
+	// is absolutely negligible.
 	for (size_t i = 0; i < 32; ++i) {
 		struct ex_spec const *es = &ex_spec_tab[i];
 		idt_set_isr(i, es->addr, es->gate);

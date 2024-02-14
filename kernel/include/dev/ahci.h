@@ -71,7 +71,7 @@ struct ahci_recv_fis {
 } __attribute__((packed));
 
 struct ahci_cmd_hdr {
-	uint16_t cmd_data, prdt_len;
+	uint16_t cmd_data, prd_tab_len;
 	uint32_t prd_byte_cnt;
 	uint32_t cmd_tab_base, cmd_tab_base_upper;
 	uint32_t _res[4];
@@ -91,21 +91,12 @@ struct ahci_cmd_tab {
 	struct ahci_phys_reg_desc prd_tab[65535];
 } __attribute__((packed));
 
-// `which` is the parameter passed to `pci_conf_find()` to determine which of
-// possibly multiple AHCI HBAs in the system to use.
-struct ahci_hba *ahci_get_hba_base(size_t which);
-
-struct ahci_recv_fis *ahci_get_recv_fis(struct ahci_port *port);
-struct ahci_cmd_hdr *ahci_get_cmd_list(struct ahci_port *port);
-struct ahci_cmd_tab *ahci_get_cmd_tab(struct ahci_cmd_hdr *list, uint8_t tab);
-
-int ahci_hba_init(struct ahci_hba *hba);
-void ahci_hba_init_pci(struct pci_hdr_00h *hba_hdr);
+int ahci_hba_init(struct ahci_hba *hba, struct pci_hdr_00h *hba_pci);
 int ahci_port_init(struct ahci_port *port, struct ahci_hba *hba);
 void ahci_port_start_cmd(struct ahci_port *port);
 void ahci_port_stop_cmd(struct ahci_port *port);
 
-int ahci_port_rd(phys_addr_t dst, struct ahci_port *port, blk_addr_t src, size_t nsector);
-int ahci_port_wr(blk_addr_t dst, struct ahci_port *port, phys_addr_t src, size_t nsector);
+int ahci_port_rd(struct ahci_port *port, phys_addr_t dst, blk_addr_t src, size_t nsector);
+int ahci_port_wr(struct ahci_port *port, blk_addr_t dst, phys_addr_t src, size_t nsector);
 
 #endif
