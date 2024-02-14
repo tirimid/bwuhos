@@ -17,6 +17,8 @@ ku_log(enum log_type type, char const *msg, ...)
 	va_start(args, msg);
 	
 	switch (type) {
+	case LT_NONE:
+		break;
 	case LT_INFO:
 		sp_write_str("[info] ");
 		break;

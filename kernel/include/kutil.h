@@ -5,7 +5,8 @@
 #include <stdint.h>
 
 enum log_type {
-	LT_INFO = 0,
+	LT_NONE = 0,
+	LT_INFO,
 	LT_WARN,
 	LT_ERR,
 	LT_DEBUG,

@@ -5,6 +5,9 @@ qemu-system-x86_64 \
 	-d int -D emu_log.txt \
 	-s -S \
 	-serial file:/dev/stdout \
-	-drive id=disk,file=bwuhos.iso,if=none \
-	-device ahci,id=ahci \
-	-device ide-hd,drive=disk,bus=ahci.0
+	-hda bwuhos.iso
+
+# use for AHCI SATA disk emulation.
+#	-drive id=disk,file=bwuhos.iso,if=none \
+#	-device ahci,id=ahci \
+#	-device ide-hd,drive=disk,bus=ahci.0

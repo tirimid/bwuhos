@@ -91,12 +91,22 @@ struct ahci_cmd_tab {
 	struct ahci_phys_reg_desc prd_tab[65535];
 } __attribute__((packed));
 
-int ahci_hba_init(struct ahci_hba *hba, struct pci_hdr_00h *hba_pci);
-int ahci_port_init(struct ahci_port *port, struct ahci_hba *hba);
-void ahci_port_start_cmd(struct ahci_port *port);
-void ahci_port_stop_cmd(struct ahci_port *port);
+// i can't do this shit anymore, implement later.
+#if 0
+int ahci_hba_init(struct ahci_hba volatile *hba, struct pci_hdr_00h *hba_pci);
+int ahci_port_init(struct ahci_port volatile *port, struct ahci_hba const *hba);
+void ahci_port_reset(struct ahci_port volatile *port);
+void ahci_port_start_cmd(struct ahci_port volatile *port);
+void ahci_port_stop_cmd(struct ahci_port volatile *port);
 
-int ahci_port_rd(struct ahci_port *port, phys_addr_t dst, blk_addr_t src, size_t nsector);
-int ahci_port_wr(struct ahci_port *port, blk_addr_t dst, phys_addr_t src, size_t nsector);
+// if non-`NULL`, `marker` will be set to 0 upon successful request, 1 upon
+// successful request completion, and -1 upon failed request completion - this
+// is for use in asynchronous code.
+// if `NULL`, the calls will simply block until the request completes, at which
+// point a return value of 0 indicates success and non-zero indicates failure.
+int ahci_port_id(struct ahci_port volatile *port, phys_addr_t dst, int *marker);
+int ahci_port_rd(struct ahci_port volatile *port, phys_addr_t dst, blk_addr_t src, size_t nsector, int *marker);
+int ahci_port_wr(struct ahci_port volatile *port, blk_addr_t dst, phys_addr_t src, size_t nsector, int *marker);
+#endif
 
 #endif
