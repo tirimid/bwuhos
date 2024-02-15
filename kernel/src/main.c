@@ -8,6 +8,11 @@
 #include "sys/gdt.h"
 #include "sys/idt.h"
 
+// debug includes.
+#include "dev/ata_pio.h"
+#include "kdump.h"
+#include "sys/port.h"
+
 static void init_stage_1(void);
 static void init_stage_2(void);
 
@@ -39,6 +44,12 @@ static void
 init_stage_2(void)
 {
 	ku_log(LT_INFO, "reached kernel init stage 2");
+	
+	struct ata_pio_dev dev;
+	ata_pio_dev_get(&dev, P_ATA_1_IO, P_ATA_1_CTL, 0);
+	uint16_t id_buf[256];
+	ata_pio_dev_id(&dev, id_buf);
+	kdump_ata_id(id_buf);
 	
 	ku_hang();
 }

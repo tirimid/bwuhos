@@ -10,6 +10,12 @@ enum port {
 	P_PIC2_CMD = 0xa0,
 	P_PIC2_DATA = 0xa1,
 	
+	// ATA PIO.
+	P_ATA_1_IO = 0x1f0,
+	P_ATA_2_IO = 0x170,
+	P_ATA_1_CTL = 0x3f6,
+	P_ATA_2_CTL = 0x376,
+	
 	// serial COM.
 	// "less reliable" COM3-8 not included.
 	P_COM1 = 0x3f8,

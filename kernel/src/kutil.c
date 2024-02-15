@@ -6,9 +6,16 @@
 
 #include "dev/serial_port.h"
 
-static void fmt_log_x(uint64_t n);
-static void fmt_log_b(uint64_t n);
-static void fmt_log_u(uint64_t n);
+enum fmt_mod {
+	FM_QWORD = 0x1,
+	FM_DWORD = 0x2,
+	FM_WORD = 0x4,
+	FM_BYTE = 0x8,
+};
+
+static void fmt_log_x(uint64_t n, uint32_t mod);
+static void fmt_log_b(uint64_t n, uint32_t mod);
+static void fmt_log_u(uint64_t n, uint32_t mod);
 
 void
 ku_log(enum log_type type, char const *msg, ...)
@@ -45,15 +52,37 @@ ku_log(enum log_type type, char const *msg, ...)
 			continue;
 		}
 		
+		uint32_t mod = 0;
+		switch (*(c + 1)) {
+		case 'Q':
+			mod |= FM_QWORD;
+			++c;
+			break;
+		case 'D':
+			mod |= FM_DWORD;
+			++c;
+			break;
+		case 'W':
+			mod |= FM_WORD;
+			++c;
+			break;
+		case 'B':
+			mod |= FM_BYTE;
+			++c;
+			break;
+		default:
+			break;
+		}
+		
 		switch (*(c++ + 1)) {
 		case 'x':
-			fmt_log_x(va_arg(args, uint64_t));
+			fmt_log_x(va_arg(args, uint64_t), mod);
 			break;
 		case 'b':
-			fmt_log_b(va_arg(args, uint64_t));
+			fmt_log_b(va_arg(args, uint64_t), mod);
 			break;
 		case 'u':
-			fmt_log_u(va_arg(args, uint64_t));
+			fmt_log_u(va_arg(args, uint64_t), mod);
 			break;
 		default:
 			break;
@@ -73,18 +102,29 @@ ku_smc_8(void *dst, void const *src, size_t n)
 }
 
 static void
-fmt_log_x(uint64_t n)
+fmt_log_x(uint64_t n, uint32_t mod)
 {
 	static char const hex_lut[] = "0123456789abcdef";
 	
-	if (!n) {
-		sp_write_ch('0');
-		return;
+	size_t nch;
+	if (mod & FM_QWORD)
+		nch = 16;
+	else if (mod & FM_DWORD)
+		nch = 8;
+	else if (mod & FM_WORD)
+		nch = 4;
+	else if (mod & FM_BYTE)
+		nch = 2;
+	else {
+		if (!n) {
+			sp_write_ch('0');
+			return;
+		}
+		
+		nch = 0;
+		while (nch < 16 && n >> 4 * nch)
+			++nch;
 	}
-	
-	size_t nch = 0;
-	while (nch < 16 && n >> 4 * nch)
-		++nch;
 	
 	char text[17] = {0};
 	for (size_t i = 0; i < nch; ++i)
@@ -94,16 +134,27 @@ fmt_log_x(uint64_t n)
 }
 
 static void
-fmt_log_b(uint64_t n)
+fmt_log_b(uint64_t n, uint32_t mod)
 {
-	if (!n) {
-		sp_write_ch('0');
-		return;
+	size_t nch;
+	if (mod & FM_QWORD)
+		nch = 64;
+	else if (mod & FM_DWORD)
+		nch = 32;
+	else if (mod & FM_WORD)
+		nch = 16;
+	else if (mod & FM_BYTE)
+		nch = 8;
+	else {
+		if (!n) {
+			sp_write_ch('0');
+			return;
+		}
+		
+		nch = 0;
+		while (nch < 64 && n >> nch)
+			++nch;
 	}
-	
-	size_t nch = 0;
-	while (nch < 64 && n >> nch)
-		++nch;
 	
 	char text[65] = {0};
 	for (size_t i = 0; i < nch; ++i)
@@ -113,7 +164,7 @@ fmt_log_b(uint64_t n)
 }
 
 static void
-fmt_log_u(uint64_t n)
+fmt_log_u(uint64_t n, uint32_t mod)
 {
 	// TODO: implement unsigned decimal formatting.
 }
