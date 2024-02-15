@@ -1,5 +1,5 @@
-	.ifndef SYS_CPU_S__
-	.equ SYS_CPU_S__, 1
+	.ifndef CPU_S__
+	.equ CPU_S__, 1
 	
 	.global cpu_get_ctl_regs
 cpu_get_ctl_regs:
@@ -23,12 +23,5 @@ cpu_get_ctl_regs:
 	mov rax, rdi
 	
 	ret
-	
-	.global cpu_switch_mem_ctx
-cpu_switch_mem_ctx:
-	mov cr3, rdi
-	mov rbp, rsi
-	mov rsp, rsi
-	jmp rdx
 	
 	.endif

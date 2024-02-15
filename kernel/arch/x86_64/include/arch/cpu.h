@@ -1,9 +1,7 @@
-#ifndef SYS_CPU_H__
-#define SYS_CPU_H__
+#ifndef ARCH_CPU_H__
+#define ARCH_CPU_H__
 
 #include <stdint.h>
-
-#include "kdef.h"
 
 struct cpu_gen_regs {
 	uint64_t rax, rbx, rcx, rdx;
@@ -18,6 +16,5 @@ struct cpu_ctl_regs {
 } __attribute((packed));
 
 struct cpu_ctl_regs cpu_get_ctl_regs(void);
-void cpu_switch_mem_ctx(phys_addr_t cr3, void const *stk_base, void (*post_load_jmp)(void));
 
 #endif

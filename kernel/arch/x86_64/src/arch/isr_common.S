@@ -1,9 +1,9 @@
-	.ifndef ISR_ISR_COMMON_S__
-	.equ ISR_ISR_COMMON_S__, 1
+	.ifndef ISR_COMMON_S__
+	.equ ISR_COMMON_S__, 1
 	
-	.include "kdef.S"
+	.include "arch/arch_def.S"
 	
-	.macro DEF_ISR_HEAD name
+	.macro ISR_DEF_HEAD name
 	
 	.global \name\()_body
 	.global \name\()_head
@@ -16,7 +16,7 @@
 	
 	.endm
 	
-	.macro DEF_EX_HEAD name
+	.macro ISR_EXCEPT_DEF_HEAD name
 	
 	.global \name\()_body
 	.global \name\()_head

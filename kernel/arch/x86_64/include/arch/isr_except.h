@@ -1,23 +1,23 @@
-#ifndef ISR_EXCEPTION_H__
-#define ISR_EXCEPTION_H__
+#ifndef ARCH_ISR_EXCEPT_H__
+#define ARCH_ISR_EXCEPT_H__
 
 #include <stdint.h>
 
-struct ex_spec {
+struct isr_except_spec {
 	uintptr_t addr;
 	uint8_t gate;
 };
 
-struct ex_frame_no_code {
+struct isr_except_frame_no_code {
 	uint64_t rip, cs, flags, rsp, ss;
 } __attribute__((packed));
 
-struct ex_frame_code {
+struct isr_except_frame_code {
 	uint64_t e, rip, cs, flags, rsp, ss;
 } __attribute__((packed));
 
 // when loading the IDT, they are taken from this table.
-// see `sys/idt.c` for details.
-extern struct ex_spec const ex_spec_tab[32];
+// see `idt.c` for details.
+extern struct isr_except_spec const isr_except_spec_tab[32];
 
 #endif

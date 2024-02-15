@@ -1,18 +1,7 @@
-#include "sys/idt.h"
+#include "arch/idt.h"
 
-#include "isr/exception.h"
-#include "kutil.h"
-#include "sys/gdt.h"
-
-struct idt_ent {
-	uint16_t base_0;
-	uint16_t sel;
-	uint8_t ist;
-	uint8_t type_attr;
-	uint16_t base_1;
-	uint32_t base_2;
-	uint32_t _zero;
-} __attribute__((packed));
+#include "arch/gdt.h"
+#include "arch/isr_except.h"
 
 static struct idt_ent mk_idt_ent(uintptr_t addr, uint8_t type_attr);
 
@@ -21,13 +10,9 @@ static struct idt_ent idt[256];
 void
 idt_init(void)
 {
-	ku_log(LT_INFO, "initializing IDT");
-	
-	// it's not ideal to load these ISRs at runtime but the performance hit
-	// is absolutely negligible.
 	for (size_t i = 0; i < 32; ++i) {
-		struct ex_spec const *es = &ex_spec_tab[i];
-		idt_set_isr(i, es->addr, es->gate);
+		idt_set_isr(i, isr_except_spec_tab[i].addr,
+		            isr_except_spec_tab[i].gate);
 	}
 	
 	struct idtr idtr = {

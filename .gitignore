@@ -1,6 +1,7 @@
 /emu_log.txt
 /bwuhos.iso
-/kernel/lib
+/kernel/kernel/lib
+/kernel/arch/x86_64/lib
 /kernel/kbin
 /kernel/kbin.debug
 /root/boot/kbin

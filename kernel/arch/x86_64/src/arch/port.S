@@ -1,5 +1,5 @@
-	.ifndef SYS_PORT_S__
-	.equ SYS_PORT_S__, 1
+	.ifndef PORT_S__
+	.equ PORT_S__, 1
 
 	.global port_rd_8
 port_rd_8:
@@ -41,11 +41,6 @@ port_wr_32:
 	mov rdx, rdi
 	mov rax, rsi
 	out dx, eax
-	ret
-
-	.global port_wait
-port_wait:
-	outb 0x80, %al
 	ret
 
 	.endif

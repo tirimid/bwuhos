@@ -1,5 +1,5 @@
-	.ifndef SYS_GDT_S__
-	.equ SYS_GDT_S__, 1
+	.ifndef GDT_S__
+	.equ GDT_S__, 1
 
 	.global gdt_load
 gdt_load:
