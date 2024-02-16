@@ -1,7 +1,9 @@
 #include "arch/idt.h"
 
+#include "arch/autil.h"
 #include "arch/gdt.h"
 #include "arch/isr_except.h"
+#include "arch/isr_other.h"
 
 static struct idt_ent mk_idt_ent(uintptr_t addr, uint8_t type_attr);
 
@@ -10,10 +12,15 @@ static struct idt_ent idt[256];
 void
 idt_init(void)
 {
+	au_println(LT_INFO, "initializing IDT");
+	
 	for (size_t i = 0; i < 32; ++i) {
 		idt_set_isr(i, isr_except_spec_tab[i].addr,
 		            isr_except_spec_tab[i].gate);
 	}
+	
+	for (size_t i = 32; i < 256; ++i)
+		idt_set_isr(i, (uintptr_t)isr_default_head, IGT_INT);
 	
 	struct idtr idtr = {
 		.size = sizeof(idt) - 1,

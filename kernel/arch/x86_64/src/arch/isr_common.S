@@ -1,7 +1,7 @@
 	.ifndef ISR_COMMON_S__
 	.equ ISR_COMMON_S__, 1
 	
-	.include "arch/arch_def.S"
+	.include "arch/adef.S"
 	
 	.macro ISR_DEF_HEAD name
 	

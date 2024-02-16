@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "kdef.h"
+#include "sys/port.h"
 
 // registers and bits implemented according to OSDev wiki.
 
@@ -64,12 +65,12 @@ struct ata_pio_dev {
 	size_t sector_size, nsector;
 	
 	// ATA data.
-	uint16_t bus_io_port, bus_ctl_port;
+	port_t bus_io_port, bus_ctl_port;
 	uint8_t dev_num; // 0 or 1 since ATA bus supports two devices.
 	uint8_t support;
 };
 
-int ata_pio_dev_get(struct ata_pio_dev *out, uint16_t bus_io_port, uint16_t bus_ctl_port, uint8_t dev_num);
+int ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port, port_t bus_ctl_port, uint8_t dev_num);
 int ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id);
 int ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src, size_t nsector);
 int ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src, size_t nsector);

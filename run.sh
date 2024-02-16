@@ -28,6 +28,7 @@ case $ARCH in
 			-s -S \
 			-serial file:/dev/stdout \
 			-hda bwuhos.iso
+		;;
 esac
 
 # QEmu arguments for AHCI SATA disk emulation:

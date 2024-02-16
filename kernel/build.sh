@@ -55,7 +55,7 @@ echo -e "${ECHO_COLOR}[/kernel] linking kernel binary\033[0m"
 case $ARCH in
 	x86_64)
 		/opt/cross/bin/x86_64-elf-gcc \
-			-Tconf/kbin_x86_64.ld \
+			-Tconf/$ARCH/kbin.ld \
 			-ffreestanding \
 			-nostdlib \
 			-lgcc \
@@ -63,6 +63,7 @@ case $ARCH in
 			-o kbin \
 			-g \
 			$OBJS
+		;;
 esac
 if [ $? -ne 0 ]
 then

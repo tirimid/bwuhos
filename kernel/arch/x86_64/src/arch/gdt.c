@@ -1,5 +1,7 @@
 #include "arch/gdt.h"
 
+#include "arch/autil.h"
+
 static struct gdt_ent gdt[] = {
 	[1] = {
 		// kernel code.
@@ -24,6 +26,8 @@ static struct gdt_ent gdt[] = {
 void
 gdt_init(void)
 {
+	au_println(LT_INFO, "initializing GDT");
+	
 	struct gdtr gdtr = {
 		.size = sizeof(gdt) - 1,
 		.base = (uintptr_t)gdt,

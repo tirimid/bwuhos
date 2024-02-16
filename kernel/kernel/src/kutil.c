@@ -1,9 +1,6 @@
 #include "kutil.h"
 
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdint.h>
-
+#include "arch/autil.h"
 #include "dev/serial_port.h"
 
 enum fmt_mod {
@@ -13,16 +10,48 @@ enum fmt_mod {
 	FM_BYTE = 0x8,
 };
 
-static void fmt_log_x(uint64_t n, uint32_t mod);
-static void fmt_log_b(uint64_t n, uint32_t mod);
-static void fmt_log_u(uint64_t n, uint32_t mod);
+static void print_fmt_x(uint64_t n, uint32_t mod);
+static void print_fmt_b(uint64_t n, uint32_t mod);
+static void print_fmt_u(uint64_t n, uint32_t mod);
 
 void
-ku_log(enum log_type type, char const *msg, ...)
+ku_hang(void)
+{
+	// assume all implemented arches will provide `au_hang()` in autil.
+	au_hang();
+}
+
+void
+ku_spin_cycles(unsigned long long ncycles)
+{
+	// assume, based on basically nothing, that every iteration will take
+	// somewhere around 0.5 - 3 clock cycles.
+	for (unsigned volatile i = 0; i < ncycles; ++i)
+		;
+}
+
+void
+ku_print(enum log_type type, char const *msg, ...)
 {
 	va_list args;
 	va_start(args, msg);
-	
+	ku_print_v(type, msg, args);
+	va_end(args);
+}
+
+void
+ku_println(enum log_type type, char const *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	ku_print_v(type, msg, args);
+	sp_write_ch('\n');
+	va_end(args);
+}
+
+void
+ku_print_v(enum log_type type, char const *msg, va_list args)
+{
 	switch (type) {
 	case LT_NONE:
 		break;
@@ -76,33 +105,49 @@ ku_log(enum log_type type, char const *msg, ...)
 		
 		switch (*(c++ + 1)) {
 		case 'x':
-			fmt_log_x(va_arg(args, uint64_t), mod);
+			print_fmt_x(va_arg(args, uint64_t), mod);
 			break;
 		case 'b':
-			fmt_log_b(va_arg(args, uint64_t), mod);
+			print_fmt_b(va_arg(args, uint64_t), mod);
 			break;
 		case 'u':
-			fmt_log_u(va_arg(args, uint64_t), mod);
+			print_fmt_u(va_arg(args, uint64_t), mod);
 			break;
 		default:
 			break;
 		}
 	}
-	
-	sp_write_ch('\n');
-	
-	va_end(args);
 }
 
 void
-ku_smc_8(void *dst, void const *src, size_t n)
+ku_memset(void *dst, uint8_t b, size_t n)
 {
+#if defined(K_ARCH_X86_64)
+	uint64_t q = b;
+	q |= (uint64_t)b << 8;
+	q |= (uint64_t)b << 16;
+	q |= (uint64_t)b << 24;
+	q |= (uint64_t)b << 32;
+	q |= (uint64_t)b << 40;
+	q |= (uint64_t)b << 48;
+	q |= (uint64_t)b << 56;
+	
+	au_fms_64(dst, q, n / 8);
+	for (size_t i = n - n % 3; i < n; ++i)
+		*((uint8_t *)dst + i) = b;
+#endif
+}
+
+void
+ku_memcpy(void *dst, void const *src, size_t n)
+{
+	// TODO: CPU efficient implementation using string operations.
 	for (size_t i = 0; i < n; ++i)
 		*((uint8_t *)dst + i) = *((uint8_t *)src + i);
 }
 
 static void
-fmt_log_x(uint64_t n, uint32_t mod)
+print_fmt_x(uint64_t n, uint32_t mod)
 {
 	static char const hex_lut[] = "0123456789abcdef";
 	
@@ -134,7 +179,7 @@ fmt_log_x(uint64_t n, uint32_t mod)
 }
 
 static void
-fmt_log_b(uint64_t n, uint32_t mod)
+print_fmt_b(uint64_t n, uint32_t mod)
 {
 	size_t nch;
 	if (mod & FM_QWORD)
@@ -164,7 +209,7 @@ fmt_log_b(uint64_t n, uint32_t mod)
 }
 
 static void
-fmt_log_u(uint64_t n, uint32_t mod)
+print_fmt_u(uint64_t n, uint32_t mod)
 {
 	// TODO: implement unsigned decimal formatting.
 }

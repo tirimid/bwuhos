@@ -15,20 +15,13 @@ static size_t hdr_sizes[] = {
 uint32_t
 pci_conf_rd_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg)
 {
-	uint32_t addr = ADDR_ENABLE;
-	addr |= (uint32_t)bus << 16;
-	addr |= (uint32_t)dev << 11;
-	addr |= (uint32_t)fn << 8;
-	addr |= reg;
-	addr &= 0x80fffffc; // clear reserved bits.
-	
-	port_wr_32(P_PCI_CONF_ADDR, addr);
-	return port_rd_32(P_PCI_CONF_DATA);
+	// TODO: implement PCI dword read.
 }
 
 void
 pci_conf_wr_32(uint8_t bus, uint8_t dev, uint8_t fn, uint8_t reg)
 {
+	// TODO: implement PCI dword write.
 }
 
 int
@@ -57,6 +50,7 @@ void
 pci_conf_wr_hdr(union pci_hdr *out, uint8_t type, uint8_t bus, uint8_t dev,
                 uint8_t fn)
 {
+	// TODO: implement PCI header write.
 }
 
 int
@@ -75,7 +69,7 @@ pci_conf_find(union pci_hdr *out, uint8_t class, uint8_t subclass,
 			    && (common->class_1 & 0xff) == subclass
 			    && common->class_1 >> 8 == class
 			    && ++nfound > which) {
-				ku_smc_8(out, buf, hdr_sizes[common->hdr_type & 0x7f]);
+				ku_memcpy(out, buf, hdr_sizes[common->hdr_type & 0x7f]);
 				return 0;
 			}
 			
@@ -92,7 +86,7 @@ pci_conf_find(union pci_hdr *out, uint8_t class, uint8_t subclass,
 				    && (common->class_1 & 0xff) == subclass
 				    && common->class_1 >> 8 == class
 				    && ++nfound > which) {
-					ku_smc_8(out, buf, hdr_sizes[common->hdr_type & 0x7f]);
+					ku_memcpy(out, buf, hdr_sizes[common->hdr_type & 0x7f]);
 					return 0;
 				}
 			}
