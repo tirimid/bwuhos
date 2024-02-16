@@ -1,5 +1,5 @@
-#ifndef KDEF_H__
-#define KDEF_H__
+#ifndef KDEF_H
+#define KDEF_H
 
 #define PAGE_SIZE 4096
 #define SECTOR_SIZE 512

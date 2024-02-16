@@ -1,5 +1,5 @@
-	.ifndef ARCH_DEF_S__
-	.equ ARCH_DEF_S__, 1
+	.ifndef ARCH_DEF_S
+	.equ ARCH_DEF_S, 1
 	
 	.macro PUSH_GEN_REGS
 	

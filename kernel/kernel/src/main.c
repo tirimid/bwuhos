@@ -4,6 +4,7 @@
 #include "kutil.h"
 #include "mm/mem_layout.h"
 #include "mm/pmm.h"
+#include "mm/vmm.h"
 
 static void init_stage_2(void);
 
@@ -21,10 +22,7 @@ _start(void)
 	
 	pmm_init();
 	arch_master_init();
-	
-	// TODO: add VMM init and jump to init stage 2.
-	
-	ku_hang();
+	vmm_init(init_stage_2);
 }
 
 static void

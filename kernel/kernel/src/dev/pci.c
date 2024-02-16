@@ -47,8 +47,7 @@ pci_conf_rd_hdr(union pci_hdr *out, uint8_t bus, uint8_t dev, uint8_t fn)
 }
 
 void
-pci_conf_wr_hdr(union pci_hdr *out, uint8_t type, uint8_t bus, uint8_t dev,
-                uint8_t fn)
+pci_conf_wr_hdr(uint8_t bus, uint8_t dev, uint8_t fn, union pci_hdr const *hdr)
 {
 	// TODO: implement PCI header write.
 }

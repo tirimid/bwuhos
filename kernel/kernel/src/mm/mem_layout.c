@@ -16,7 +16,7 @@ static struct limine_memmap_request volatile mem_map_req = {
 int
 meml_init(void)
 {
-	ku_println(LT_INFO, "initializing memory layout");
+	ku_println(LT_INFO, "initializing memory layout interface");
 	
 	ml_size = 0;
 	size_t resp_ent_cnt = mem_map_req.response->entry_count;

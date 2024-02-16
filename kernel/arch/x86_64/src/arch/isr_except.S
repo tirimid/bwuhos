@@ -1,5 +1,5 @@
-	.ifndef ISR_EXCEPT_S__
-	.set ISR_EXCEPT_S__, 1
+	.ifndef ARCH_ISR_EXCEPT_S
+	.set ARCH_ISR_EXCEPT_S, 1
 	
 	.include "arch/isr_common.S"
 	

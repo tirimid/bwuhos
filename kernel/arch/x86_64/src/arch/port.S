@@ -1,5 +1,5 @@
-	.ifndef PORT_S__
-	.equ PORT_S__, 1
+	.ifndef ARCH_PORT_S
+	.equ ARCH_PORT_S, 1
 
 	.global port_rd_8
 port_rd_8:

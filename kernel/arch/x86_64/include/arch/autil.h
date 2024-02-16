@@ -1,5 +1,5 @@
-#ifndef ARCH_AUTIL_H__
-#define ARCH_AUTIL_H__
+#ifndef ARCH_AUTIL_H
+#define ARCH_AUTIL_H
 
 #include <stddef.h>
 #include <stdint.h>

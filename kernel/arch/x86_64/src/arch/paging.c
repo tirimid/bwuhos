@@ -13,11 +13,11 @@ struct page_index {
 };
 
 static struct page_index vaddr_to_pg_ind(void const *vaddr);
-static page_dir_t *next_pg_dir(page_dir_t *cur, size_t ind, uint8_t flags);
+static page_dir_t *next_pg_dir(page_dir_t *cur, size_t ind, uint64_t flags);
 static page_dir_t *some_next_pg_dir(page_dir_t *cur, size_t ind);
 
 phys_addr_t
-paging_mk_map(void)
+paging_create_map(void)
 {
 	phys_addr_t pml4 = pmm_alloc();
 	au_fms_64((void *)pml4, 0, PAGE_SIZE / 8);
@@ -30,8 +30,14 @@ paging_mk_map(void)
 }
 
 void
+paging_destroy_map(phys_addr_t pml4)
+{
+	// TODO: implement freeing and deallocation of map.
+}
+
+void
 paging_map(phys_addr_t pml4, phys_addr_t paddr, void const *vaddr,
-           uint8_t flags)
+           uint64_t flags)
 {
 	paddr &= ~(PAGE_SIZE - 1);
 	
@@ -72,7 +78,7 @@ vaddr_to_pg_ind(void const *vaddr)
 }
 
 static page_dir_t *
-next_pg_dir(page_dir_t *cur, size_t ind, uint8_t flags)
+next_pg_dir(page_dir_t *cur, size_t ind, uint64_t flags)
 {
 	if (!(cur[ind] & PF_P)) {
 		phys_addr_t new = pmm_alloc();

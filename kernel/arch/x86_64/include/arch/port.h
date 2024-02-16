@@ -1,5 +1,5 @@
-#ifndef ARCH_PORT_H__
-#define ARCH_PORT_H__
+#ifndef ARCH_PORT_H
+#define ARCH_PORT_H
 
 #include <stdint.h>
 

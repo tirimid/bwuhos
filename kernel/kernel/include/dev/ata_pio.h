@@ -1,5 +1,5 @@
-#ifndef DEV_ATA_PIO_H__
-#define DEV_ATA_PIO_H__
+#ifndef DEV_ATA_PIO_H
+#define DEV_ATA_PIO_H
 
 #include <stddef.h>
 #include <stdint.h>

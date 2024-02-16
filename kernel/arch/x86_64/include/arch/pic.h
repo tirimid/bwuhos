@@ -1,5 +1,5 @@
-#ifndef ARCH_PIC_H__
-#define ARCH_PIC_H__
+#ifndef ARCH_PIC_H
+#define ARCH_PIC_H
 
 #include <stdint.h>
 

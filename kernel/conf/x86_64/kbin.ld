@@ -13,7 +13,7 @@ SECTIONS
 {
 	. = 0xffffffff80000000;
 
-	K_START_VADDR__ = .;
+	K_START_VADDR = .;
 
 	.text : {
 		*(.text .text.*)
@@ -34,7 +34,7 @@ SECTIONS
 		*(.bss .bss.*)
 	} :data
 
-	K_END_VADDR__ = .;
+	K_END_VADDR = .;
 
 	/DISCARD/ : {
 		*(.eh_frame)

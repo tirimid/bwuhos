@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ECHO_COLOR="\033[1;32m"
 
 if [ $# -ne 1 ]

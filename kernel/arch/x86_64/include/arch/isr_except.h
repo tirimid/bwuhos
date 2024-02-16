@@ -1,5 +1,5 @@
-#ifndef ARCH_ISR_EXCEPT_H__
-#define ARCH_ISR_EXCEPT_H__
+#ifndef ARCH_ISR_EXCEPT_H
+#define ARCH_ISR_EXCEPT_H
 
 #include <stdint.h>
 

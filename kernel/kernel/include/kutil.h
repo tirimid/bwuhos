@@ -1,5 +1,5 @@
-#ifndef KUTIL_H__
-#define KUTIL_H__
+#ifndef KUTIL_H
+#define KUTIL_H
 
 #include <stdarg.h>
 #include <stddef.h>

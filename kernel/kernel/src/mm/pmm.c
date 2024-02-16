@@ -25,7 +25,7 @@ static phys_addr_t page_stk[PAGE_STK_CAP];
 void
 pmm_init(void)
 {
-	ku_println(LT_INFO, "initializing physical memory manager");
+	ku_println(LT_INFO, "initializing PMM");
 	
 	struct meml_ent const *ml_ents = meml_get(&page_bm_cnt);
 	for (size_t i = 0; i < page_bm_cnt; ++i) {

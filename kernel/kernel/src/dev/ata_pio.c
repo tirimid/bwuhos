@@ -2,11 +2,21 @@
 
 #include "kutil.h"
 
-static void sel_drive(port_t bus_io_port, port_t bus_ctl_port, uint8_t dev_num);
+// max number of ATA PIO drives that can be cached.
+// more drives than this can exist and should work, but duplicate work will be
+// performed on selecting them.
+#define MAX_DRIVES 8
 
-// set to 2 to indicate uninitialized status since the only device numbers for a
-// bus are 0 and 1.
-static uint8_t drive_sel_sv[0x10000] = {2};
+// used solely for cached device selection.
+struct drive_info {
+	port_t bus_io_port;
+	uint8_t dev_num;
+};
+
+static void sel_drive(port_t bus_io_port, uint8_t dev_num);
+
+static struct drive_info drive_cache[MAX_DRIVES];
+static size_t drive_cache_size = 0, cur_sel_drive = MAX_DRIVES;
 
 int
 ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
@@ -17,7 +27,7 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	out->dev_num = dev_num,
 	out->support = 0,
 	
-	sel_drive(bus_io_port, bus_ctl_port, dev_num);
+	sel_drive(bus_io_port, dev_num);
 	
 	// initial ID to determine device information.
 	// since support is not yet determined, we cannot know whether to write
@@ -70,7 +80,7 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 int
 ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id)
 {
-	sel_drive(dev->bus_io_port, dev->bus_ctl_port, dev->dev_num);
+	sel_drive(dev->bus_io_port, dev->dev_num);
 	
 	enum port_size ps = dev->support & APDS_LBA_48 ? PS_16 : PS_8;
 	port_wr(dev->bus_io_port + APIR_SECTOR_CNT, 0, ps);
@@ -130,13 +140,26 @@ ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src,
 }
 
 static void
-sel_drive(port_t bus_io_port, port_t bus_ctl_port, uint8_t dev_num)
+sel_drive(port_t bus_io_port, uint8_t dev_num)
 {
-	// avoid doing unnecessary port operations by only switching when
-	// actually necessary.
-	if (drive_sel_sv[bus_io_port] != dev_num) {
+	size_t which;
+	for (which = 0; which < drive_cache_size; ++which) {
+		if (drive_cache[which].bus_io_port == bus_io_port
+		    && drive_cache[which].dev_num == dev_num) {
+			break;
+		}
+	}
+	
+	if (which < MAX_DRIVES && which == drive_cache_size) {
+		drive_cache[drive_cache_size++] = (struct drive_info){
+			.bus_io_port = bus_io_port,
+			.dev_num = dev_num,
+		};
+	}
+	
+	if (which != cur_sel_drive || which == MAX_DRIVES) {
+		cur_sel_drive = which;
 		port_wr(bus_io_port + APIR_DRIVE_SEL, 0xa | APDF_DRV * dev_num, PS_8);
 		ku_spin_cycles(1000);
-		drive_sel_sv[bus_io_port] = dev_num;
 	}
 }

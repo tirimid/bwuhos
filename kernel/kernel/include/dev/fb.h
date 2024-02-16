@@ -1,5 +1,5 @@
-#ifndef DEV_FB_H__
-#define DEV_FB_H__
+#ifndef DEV_FB_H
+#define DEV_FB_H
 
 #include <stdint.h>
 #include <stddef.h>

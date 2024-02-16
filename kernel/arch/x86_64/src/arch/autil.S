@@ -1,5 +1,5 @@
-	.ifndef ARCH_AUTIL_S__
-	.equ ARCH_AUTIL_S__, 1
+	.ifndef ARCH_AUTIL_S
+	.equ ARCH_AUTIL_S, 1
 	
 	.global au_hang
 au_hang:

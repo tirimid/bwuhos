@@ -1,5 +1,5 @@
-#ifndef MM_PMM_H__
-#define MM_PMM_H__
+#ifndef MM_PMM_H
+#define MM_PMM_H
 
 #include <stdbool.h>
 

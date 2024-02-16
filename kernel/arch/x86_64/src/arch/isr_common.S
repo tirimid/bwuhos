@@ -1,5 +1,5 @@
-	.ifndef ISR_COMMON_S__
-	.equ ISR_COMMON_S__, 1
+	.ifndef ARCH_ISR_COMMON_S
+	.equ ARCH_ISR_COMMON_S, 1
 	
 	.include "arch/adef.S"
 	

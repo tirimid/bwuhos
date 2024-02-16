@@ -1,5 +1,5 @@
-#ifndef ARCH_ARCH_MASTER_H__
-#define ARCH_ARCH_MASTER_H__
+#ifndef ARCH_ARCH_MASTER_H
+#define ARCH_ARCH_MASTER_H
 
 void arch_master_init(void);
 
