@@ -2,6 +2,7 @@
 
 #include <limine.h>
 
+#include "katomic.h"
 #include "kdef.h"
 #include "kutil.h"
 
@@ -17,6 +18,7 @@ static struct limine_framebuffer_request volatile fb_req = {
 static uint64_t gen_mask(uint8_t size);
 
 static struct fb_info fbs[MAX_FB_CNT];
+static k_mutex_t fb_mutexes[MAX_FB_CNT];
 static size_t fb_cnt;
 
 int
@@ -104,7 +106,11 @@ int
 fb_get_pixel(uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, fb_id_t fb,
              uint64_t x, uint64_t y)
 {
+	k_mutex_lock(&fb_mutexes[fb]);
+	
 	// TODO: implement get pixel.
+	
+	k_mutex_unlock(&fb_mutexes[fb]);
 	return 1;
 }
 
@@ -116,6 +122,8 @@ fb_put_pixel(fb_id_t fb, uint64_t x, uint64_t y, uint8_t r, uint8_t g,
 	if (x >= info->width || y >= info->height)
 		return 1;
 	
+	k_mutex_lock(&fb_mutexes[fb]);
+	
 	size_t off = info->mem_info.pitch * y + info->mem_info.depth / 8 * x;
 	uint64_t *px = (uint64_t *)(info->addr + off);
 	
@@ -124,6 +132,7 @@ fb_put_pixel(fb_id_t fb, uint64_t x, uint64_t y, uint8_t r, uint8_t g,
 	*px |= (g & info->mem_info.mask_g) << info->mem_info.shift_g;
 	*px |= (b & info->mem_info.mask_b) << info->mem_info.shift_b;
 	
+	k_mutex_unlock(&fb_mutexes[fb]);
 	return 0;
 }
 

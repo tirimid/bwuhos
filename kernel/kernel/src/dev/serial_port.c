@@ -1,9 +1,12 @@
 #include "dev/serial_port.h"
 
+#include "katomic.h"
 #include "kdef.h"
 #include "sys/port.h"
 
 #define PORT_COM1 0x3f8
+
+static k_mutex_t mutex;
 
 int
 sp_init(void)
@@ -30,24 +33,41 @@ sp_init(void)
 char
 sp_read_ch(void)
 {
+	k_mutex_lock(&mutex);
+	
 	while (!(port_rd(PORT_COM1 + 5, PS_8) & 0x1))
 		;
 	
-	return port_rd(PORT_COM1, PS_8);
+	uint8_t ch = port_rd(PORT_COM1, PS_8);
+	
+	k_mutex_unlock(&mutex);
+	return ch;
 }
 
 void
 sp_write_ch(char ch)
 {
+	k_mutex_lock(&mutex);
+	
 	while (!(port_rd(PORT_COM1 + 5, PS_8) & 0x20))
 		;
 	
 	port_wr(PORT_COM1, ch, PS_8);
+	
+	k_mutex_unlock(&mutex);
 }
 
 void
 sp_write_str(char const *s)
 {
-	for (char const *c = s; *c; ++c)
-		sp_write_ch(*c);
+	k_mutex_lock(&mutex);
+	
+	for (char const *c = s; *c; ++c) {
+		while (!(port_rd(PORT_COM1 + 5, PS_8) & 0x20))
+			;
+		
+		port_wr(PORT_COM1, *c, PS_8);;
+	}
+	
+	k_mutex_unlock(&mutex);
 }

@@ -1,5 +1,6 @@
 #include "dev/ata_pio.h"
 
+#include "katomic.h"
 #include "kutil.h"
 
 // max number of ATA PIO drives that can be cached.
@@ -17,6 +18,7 @@ static void sel_drive(port_t bus_io_port, uint8_t dev_num);
 
 static struct drive_info drive_cache[MAX_DRIVES];
 static size_t drive_cache_size = 0, cur_sel_drive = MAX_DRIVES;
+static k_mutex_t mutex;
 
 int
 ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
@@ -26,6 +28,8 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	out->bus_ctl_port = bus_ctl_port,
 	out->dev_num = dev_num,
 	out->support = 0,
+	
+	k_mutex_lock(&mutex);
 	
 	sel_drive(bus_io_port, dev_num);
 	
@@ -46,8 +50,10 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	
 	port_wr(bus_io_port + APIR_CMD, 0xec, PS_8); // IDENTIFY.
 	uint8_t status = port_rd(bus_io_port + APIR_STATUS, PS_8);
-	if (!status)
+	if (!status) {
+		k_mutex_unlock(&mutex);
 		return 1;
+	}
 	
 	// TODO: check for non-standard ATAPI and give error if found.
 	while (status & APS_BSY)
@@ -56,8 +62,10 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	while (!(status & APS_DRQ) && !(status & APS_ERR))
 		status = port_rd(bus_io_port + APIR_STATUS, PS_8);
 	
-	if (status & APS_ERR)
+	if (status & APS_ERR) {
+		k_mutex_unlock(&mutex);
 		return 1;
+	}
 	
 	uint16_t id_buf[256];
 	for (size_t i = 0; i < 256; ++i)
@@ -71,15 +79,19 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	
 	if (!(out->support & APDS_LBA)) {
 		ku_println(LT_ERR, "ATA device at 0x%x (p) uses CHS which is unsupported!", bus_io_port);
+		k_mutex_unlock(&mutex);
 		return 1;
 	}
 	
+	k_mutex_unlock(&mutex);
 	return 0;
 }
 
 int
 ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id)
 {
+	k_mutex_lock(&mutex);
+	
 	sel_drive(dev->bus_io_port, dev->dev_num);
 	
 	enum port_size ps = dev->support & APDS_LBA_48 ? PS_16 : PS_8;
@@ -101,12 +113,15 @@ ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id)
 	while (!(status & APS_DRQ) && !(status & APS_ERR))
 		status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
 	
-	if (status & APS_ERR)
+	if (status & APS_ERR) {
+		k_mutex_unlock(&mutex);
 		return 1;
+	}
 	
 	for (size_t i = 0; i < 256; ++i)
 		out_id[i] = port_rd(dev->bus_io_port + APIR_DATA, PS_16);
 	
+	k_mutex_unlock(&mutex);
 	return 0;
 }
 
@@ -126,8 +141,11 @@ ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src,
 	// being at `nsector` = 0.
 	nsector = nsector == max_sectors ? 0 : nsector;
 	
+	k_mutex_lock(&mutex);
+	
 	// TODO: finish implementing ATA PIO read.
 	
+	k_mutex_unlock(&mutex);
 	return 0;
 }
 
@@ -135,7 +153,11 @@ int
 ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src,
                size_t nsector)
 {
+	k_mutex_lock(&mutex);
+	
 	// TODO: implement ATA PIO write.
+	
+	k_mutex_unlock(&mutex);
 	return 1;
 }
 

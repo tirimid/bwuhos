@@ -24,6 +24,7 @@ case $ARCH in
 	x86_64)
 		qemu-system-x86_64 \
 			-cpu qemu64 \
+			-smp 4 \
 			-m 4G \
 			--no-reboot \
 			-d int -D emu_log.txt \

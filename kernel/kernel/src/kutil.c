@@ -1,7 +1,11 @@
 #include "kutil.h"
 
-#include "arch/autil.h"
 #include "dev/serial_port.h"
+#include "katomic.h"
+
+#if defined(K_ARCH_X86_64)
+#include "arch/autil.h"
+#endif
 
 enum fmt_mod {
 	FM_QWORD = 0x1,
@@ -17,8 +21,9 @@ static void print_fmt_u(uint64_t n, uint32_t mod);
 void
 ku_hang(void)
 {
-	// assume all implemented arches will provide `au_hang()` in autil.
+#if defined(K_ARCH_X86_64)
 	au_hang();
+#endif
 }
 
 void
@@ -52,6 +57,9 @@ ku_println(enum log_type type, char const *msg, ...)
 void
 ku_print_v(enum log_type type, char const *msg, va_list args)
 {
+	static k_mutex_t mutex;
+	k_mutex_lock(&mutex);
+	
 	switch (type) {
 	case LT_NONE:
 		break;
@@ -117,6 +125,8 @@ ku_print_v(enum log_type type, char const *msg, va_list args)
 			break;
 		}
 	}
+	
+	k_mutex_unlock(&mutex);
 }
 
 void

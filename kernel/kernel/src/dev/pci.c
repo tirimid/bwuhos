@@ -6,6 +6,8 @@
 #define ADDR_ENABLE 0x80000000
 #define VENDOR_NONE 0xffff
 
+// TODO: implement locking with `k_mutex_t`.
+
 static size_t hdr_sizes[] = {
 	sizeof(struct pci_hdr_00h),
 	sizeof(struct pci_hdr_01h),

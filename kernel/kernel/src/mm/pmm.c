@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "katomic.h"
 #include "kutil.h"
 #include "mm/mem_layout.h"
 
@@ -21,6 +22,7 @@ static size_t page_bm_cnt;
 static struct bitmap page_bms[MEML_MAX_ENTS];
 static size_t page_stk_size;
 static phys_addr_t page_stk[PAGE_STK_CAP];
+static k_mutex_t mutex;
 
 void
 pmm_init(void)
@@ -49,6 +51,8 @@ pmm_init(void)
 bool
 pmm_avl(phys_addr_t addr)
 {
+	k_mutex_lock(&mutex);
+	
 	addr &= ~(PAGE_SIZE - 1);
 	
 	struct bitmap const *bm;
@@ -57,17 +61,22 @@ pmm_avl(phys_addr_t addr)
 		if (bm->base <= addr && addr < bm->base + PAGE_SIZE * bm->npage)
 			goto found;
 	}
+	
+	k_mutex_unlock(&mutex);
 	return false;
 found:;
 	size_t ind = (addr - bm->base) / PAGE_SIZE;
 	size_t byte = ind / 8, bit = ind % 8;
 	
+	k_mutex_unlock(&mutex);
 	return !!(bm->data[byte] & 1 << bit);
 }
 
 phys_addr_t
 pmm_alloc(void)
 {
+	k_mutex_lock(&mutex);
+	
 	if (!page_stk_size)
 		bm_feed_stk();
 	
@@ -75,12 +84,16 @@ pmm_alloc(void)
 	if (!page_stk_size)
 		return PHYS_ADDR_NULL;
 	
-	return page_stk[--page_stk_size];
+	phys_addr_t paddr = page_stk[--page_stk_size];
+	k_mutex_unlock(&mutex);
+	return paddr;
 }
 
 void
 pmm_free(phys_addr_t addr)
 {
+	k_mutex_lock(&mutex);
+	
 	addr &= ~(PAGE_SIZE - 1);
 	
 	struct bitmap *bm;
@@ -89,6 +102,8 @@ pmm_free(phys_addr_t addr)
 		if (bm->base <= addr && addr < bm->base + PAGE_SIZE * bm->npage)
 			goto found;
 	}
+	
+	k_mutex_unlock(&mutex);
 	return;
 found:;
 	size_t ind = (addr - bm->base) / PAGE_SIZE;
@@ -96,6 +111,8 @@ found:;
 	
 	bm->data[byte] &= ~(1 << bit);
 	bm->first_free = ind < bm->first_free ? ind : bm->first_free;
+	
+	k_mutex_unlock(&mutex);
 }
 
 static void
