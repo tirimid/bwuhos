@@ -81,8 +81,10 @@ pmm_alloc(void)
 		bm_feed_stk();
 	
 	// if no pages could be fed to stack, just return `PHYS_ADDR_NULL`.
-	if (!page_stk_size)
+	if (!page_stk_size) {
+		k_mutex_unlock(&mutex);
 		return PHYS_ADDR_NULL;
+	}
 	
 	phys_addr_t paddr = page_stk[--page_stk_size];
 	k_mutex_unlock(&mutex);
