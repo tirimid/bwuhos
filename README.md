@@ -17,6 +17,8 @@ Software / system dependencies are:
 * GNU binutils with relevant ELF cross target installed at /opt/cross/bin (I
   have successfully used 2.38)
 * mincbuild (for build)
+* mtools (for build)
+* fs2di (for build)
 * QEmu for execution with `run.sh`
 * GDB for debugging when using `run.sh`
 
@@ -24,7 +26,8 @@ Software / system dependencies are:
 
 * To build bwuhos (x86_64), run `./build.sh x86_64`
 
-This will generate an ISO image which you can use the same way as any other.
+This will generate an MBR disk image which you can use the same way as any
+other.
 
 ## Usage
 
