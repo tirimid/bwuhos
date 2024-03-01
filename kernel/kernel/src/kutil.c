@@ -17,6 +17,7 @@ enum fmt_mod {
 static void print_fmt_x(uint64_t n, uint32_t mod);
 static void print_fmt_b(uint64_t n, uint32_t mod);
 static void print_fmt_u(uint64_t n, uint32_t mod);
+static void primt_fmt_s(char const *s, uint32_t mod);
 
 void
 ku_hang(void)
@@ -121,6 +122,9 @@ ku_print_v(enum log_type type, char const *msg, va_list args)
 		case 'u':
 			print_fmt_u(va_arg(args, uint64_t), mod);
 			break;
+		case 's':
+			primt_fmt_s(va_arg(args, char const *), mod);
+			break;
 		default:
 			break;
 		}
@@ -222,4 +226,10 @@ static void
 print_fmt_u(uint64_t n, uint32_t mod)
 {
 	// TODO: implement unsigned decimal formatting.
+}
+
+static void
+primt_fmt_s(char const *s, uint32_t mod)
+{
+	// TODO: implement string formatting.
 }

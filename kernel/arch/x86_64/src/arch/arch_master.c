@@ -8,7 +8,7 @@
 void
 arch_master_init(void)
 {
-	au_println(LT_INFO, "beginning arch master init");
+	au_println(LT_INFO, "arch_master: beginning init");
 	
 	gdt_init();
 	pic_init();

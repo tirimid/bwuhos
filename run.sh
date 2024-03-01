@@ -30,11 +30,11 @@ case $ARCH in
 			-d int -D emu_log.txt \
 			-s -S \
 			-serial file:/dev/stdout \
-			-hda bwuhos.iso
+			-hda bwuhos.img
 		;;
 esac
 
 # QEmu arguments for AHCI SATA disk emulation:
-# -drive id=disk,file=bwuhos.iso,if=none \
+# -drive id=disk,file=bwuhos.img,if=none \
 # -device ahci,id=ahci \
 # -device ide-hd,drive=disk,bus=ahci.0

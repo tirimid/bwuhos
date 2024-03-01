@@ -4,6 +4,7 @@
 #include "dev/fb.h"
 #include "dev/serial_port.h"
 #include "kutil.h"
+#include "mm/kheap.h"
 #include "mm/mem_layout.h"
 #include "mm/pmm.h"
 #include "mm/vmm.h"
@@ -21,14 +22,13 @@ _start(void)
 {
 	if (sp_init())
 		ku_hang();
-	
 	if (fb_init())
 		ku_hang();
-	
 	if (meml_init())
 		ku_hang();
-	
 	pmm_init();
+	if (kheap_init())
+		ku_hang();
 	arch_master_init();
 	
 	for (size_t i = 0; i < smp_req.response->cpu_count; ++i) {
@@ -42,13 +42,13 @@ _start(void)
 static void
 init_other_cpu(struct limine_smp_info *cpu)
 {
-	ku_println(LT_INFO, "other CPU jumped to `init_other_cpu()`");
+	ku_println(LT_INFO, "main: other cpu jumped to `init_other_cpu()`");
 	ku_hang();
 }
 
 static void
 init_stage_2(void)
 {
-	ku_println(LT_INFO, "reached kernel init stage 2");
+	ku_println(LT_INFO, "main: reached init stage 2");
 	ku_hang();
 }

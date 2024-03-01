@@ -53,7 +53,7 @@ static struct gdt_ent gdt[] = {
 void
 gdt_init(void)
 {
-	au_println(LT_INFO, "initializing GDT");
+	au_println(LT_INFO, "gdt: init");
 	
 	struct gdtr gdtr = {
 		.size = sizeof(gdt) - 1,

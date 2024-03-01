@@ -24,7 +24,7 @@ static size_t fb_cnt;
 int
 fb_init(void)
 {
-	ku_println(LT_INFO, "initializing framebuffer");
+	ku_println(LT_INFO, "fb: init");
 	
 	fb_cnt = 0;
 	size_t resp_fb_cnt = fb_req.response->framebuffer_count;
@@ -59,7 +59,7 @@ fb_init(void)
 	}
 	
 	if (!fb_cnt) {
-		ku_println(LT_ERR, "found no usable framebuffers!");
+		ku_println(LT_ERR, "fb: found no usable framebuffers!");
 		return 1;
 	}
 	

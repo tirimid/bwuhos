@@ -22,7 +22,7 @@ static struct idt_ent idt[256];
 void
 idt_init(void)
 {
-	au_println(LT_INFO, "initializing IDT");
+	au_println(LT_INFO, "idt: init");
 	
 	for (size_t i = 0; i < 32; ++i) {
 		idt_set_isr(i, isr_except_spec_tab[i].addr,

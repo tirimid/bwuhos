@@ -1,5 +1,6 @@
 /emu_log.txt
-/bwuhos.iso
+/bwuhos-fs.img
+/bwuhos.img
 /kernel/kernel/lib
 /kernel/arch/x86_64/lib
 /kernel/kbin

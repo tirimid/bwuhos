@@ -26,7 +26,7 @@ static struct limine_kernel_address_request volatile k_addr_req = {
 void
 vmm_init(void (*post_init_jmp)(void))
 {
-	ku_println(LT_INFO, "initializing VMM and repaging kernel");
+	ku_println(LT_INFO, "vmm: init and repaging kernel");
 	
 	page_map_t map = vmm_create_map();
 	

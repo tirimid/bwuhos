@@ -44,17 +44,9 @@ cp \
 
 cp kernel/kbin root/boot
 
-xorriso \
-	-as mkisofs \
-	-b boot/limine-bios-cd.bin \
-	-no-emul-boot \
-	-boot-load-size 4 \
-	-boot-info-table \
-	--efi-boot boot/limine-uefi-cd.bin \
-	-efi-boot-part \
-	--efi-boot-image \
-	--protective-msdos-label \
-	-o bwuhos.iso root 2> /dev/null
-
-echo -e "${ECHO_COLOR}[/] deploying bootloader\033[0m"
-./deps/limine/limine bios-install bwuhos.iso 2> /dev/null
+echo -e "${ECHO_COLOR}[/] creating disk image\033[0m"
+dd if=/dev/zero of=bwuhos-fs.img bs=1M count=50 2> /dev/null
+mformat -i bwuhos-fs.img ::
+mcopy -i bwuhos-fs.img root/* ::
+fs2di --out=bwuhos.img bwuhos-fs.img boot 6
+./deps/limine/limine bios-install bwuhos.img --quiet

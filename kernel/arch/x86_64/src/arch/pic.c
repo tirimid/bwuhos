@@ -27,7 +27,7 @@ enum icw4 {
 void
 pic_init(void)
 {
-	au_println(LT_INFO, "initializing 8259 PIC");
+	au_println(LT_INFO, "pic: init");
 	
 	// remap PIC.
 	port_wr_8(PORT_PIC1_CMD, ICW1_ICW4 | ICW1_INIT);

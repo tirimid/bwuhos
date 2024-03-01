@@ -7,6 +7,8 @@
 #include "kdef.h"
 #include "sys/port.h"
 
+struct blkdev;
+
 // registers and bits implemented according to OSDev wiki.
 
 enum ata_pio_io_reg {
@@ -39,11 +41,6 @@ enum ata_pio_err {
 	APE_BBK = 0x80,
 };
 
-enum ata_pio_drive_flag {
-	APDF_DRV = 0x10,
-	APDF_LBA = 0x40,
-};
-
 enum ata_pio_status {
 	APS_ERR = 0x1,
 	APS_IDX = 0x2,
@@ -74,5 +71,10 @@ int ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port, port_t bus_ctl_
 int ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id);
 int ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src, size_t nsector);
 int ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src, size_t nsector);
+
+// blkdev interface.
+void ata_pio_blkdev_destroy(struct blkdev *blkdev);
+int ata_pio_blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n);
+int ata_pio_blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src, size_t n);
 
 #endif
