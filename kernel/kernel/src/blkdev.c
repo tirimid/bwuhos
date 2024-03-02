@@ -4,7 +4,7 @@
 #include "kutil.h"
 #include "port.h"
 
-#define MAX_BLKDEV_CNT 64
+#define MAX_BLKDEV_CNT 512
 
 static int register_blkdev(struct blkdev *blkdev);
 static char const *blkdev_info_str(struct blkdev const *blkdev);
@@ -43,17 +43,76 @@ blkdevs_get(size_t *out_cnt)
 }
 
 struct blkdev *
-blkdev_get(enum blkdev_dev_type type, enum blkdev_driver driver, size_t which)
+blkdev_get(enum blkdev_dev_type type, enum blkdev_driver driver, size_t part_id,
+           size_t which)
 {
 	for (size_t i = 0; i < blkdev_cnt; ++i) {
 		if (blkdevs[i].dev_type == type
 		    && blkdevs[i].driver == driver
+		    && blkdevs[i].part_id == part_id
 		    && which-- == 0) {
 			return &blkdevs[i];
 		}
 	}
 	
 	return NULL;
+}
+
+size_t
+blkdev_get_which(struct blkdev const *blkdev)
+{
+	size_t which = 0;
+	for (size_t i = 0; i < blkdev_cnt; ++i) {
+		if (&blkdevs[i] == blkdev)
+			return which;
+		
+		if (blkdevs[i].dev_type == blkdev->type
+		    && blkdevs[i].driver == blkdev->type
+		    && blkdevs[i].part_id == blkdev->part_id) {
+			++ which;
+		}
+	}
+	
+	return MAX_BLKDEV_CNT;
+}
+
+struct blkdev *
+blkdev_mk_part(struct blkdev *blkdev, blk_addr_t base, size_t limit)
+{
+	// TODO: implement.
+}
+
+void
+blkdev_destroy(struct blkdev *blkdev)
+{
+	if (blkdev->driver_destroy)
+		blkdev->driver_destroy(blkdev->driver_data);
+}
+
+int
+blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n)
+{
+	if (blkdev->part_id) {
+		if (n >= blkdev->part_limit)
+			return 1;
+		blkdev->rd(blkdev, dst, src + blkdev->part_base, n);
+	} else
+		blkdev->rd(blkdev, dst, src, n);
+	
+	return 0;
+}
+
+int
+blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src, size_t n)
+{
+	if (blkdev->part_id) {
+		if (n >= blkdev->part_limit)
+			return 1;
+		blkdev->wr(blkdev, dst + blkdev->part_base, src, n);
+	} else
+		blkdev->wr(blkdev, dst, src, n);
+	
+	return 0;
 }
 
 static int

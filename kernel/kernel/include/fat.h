@@ -1,9 +1,9 @@
-#ifndef FAT16_H
-#define FAT16_H
+#ifndef FAT_H
+#define FAT_H
 
 #include <stdint.h>
 
-struct fat16_bpb {
+struct fat_bpb {
 	uint8_t jmp[3];
 	char oem_id[8];
 	uint16_t sector_size; // in bytes.
@@ -20,7 +20,7 @@ struct fat16_bpb {
 	uint32_t large_sector_cnt;
 } __attribute__((packed));
 
-struct fat16_ebpb {
+struct fat_ebpb_16 {
 	uint8_t drive_num;
 	uint8_t res; // this isn't windows NT, is it?
 	uint8_t sig;

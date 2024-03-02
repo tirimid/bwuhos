@@ -5,6 +5,7 @@
 #include "fb.h"
 #include "kutil.h"
 #include "kheap.h"
+#include "mbr.h"
 #include "mem_layout.h"
 #include "pmm.h"
 #include "serial_port.h"
@@ -55,6 +56,7 @@ init_stage_2(void)
 	if (kheap_init())
 		ku_hang();
 	blkdevs_find();
+	mbr_find();
 	
 	ku_hang();
 }

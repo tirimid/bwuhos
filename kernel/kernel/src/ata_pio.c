@@ -194,7 +194,7 @@ ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src,
 {
 	k_mutex_lock(&mutex);
 	
-	// TODO: implement ATA PIO write.
+	// TODO: implement.
 	
 	k_mutex_unlock(&mutex);
 	return 1;
@@ -204,9 +204,11 @@ struct blkdev
 ata_pio_blkdev_create(size_t blkdev_id, struct ata_pio_dev *dev)
 {
 	struct blkdev blkdev = {
-		.destroy = ata_pio_blkdev_destroy,
+		.driver_destroy = ata_pio_blkdev_driver_destroy,
 		.rd = ata_pio_blkdev_rd,
 		.wr = ata_pio_blkdev_wr,
+		.nparts = 0,
+		.part_id = 0,
 		.dev_type = BDT_DISK_DRIVE,
 		.driver = BD_ATA_PIO,
 	};
@@ -217,9 +219,9 @@ ata_pio_blkdev_create(size_t blkdev_id, struct ata_pio_dev *dev)
 }
 
 void
-ata_pio_blkdev_destroy(struct blkdev *blkdev)
+ata_pio_blkdev_driver_destroy(void *driver_data)
 {
-	kheap_free(blkdev->driver_data);
+	kheap_free(driver_data);
 }
 
 int

@@ -11,7 +11,7 @@
 #include "vmm.h"
 
 #define KH_START 0xfffffbbb00000000
-#define KH_MAX_NPAGES 65536
+#define KH_MAX_NPAGES 0x40000
 
 struct kh_ent {
 	struct kh_ent *next;
@@ -104,7 +104,7 @@ kheap_alloc(size_t n)
 void
 kheap_free(void *addr)
 {
-	// TODO: implement heap free.
+	// TODO: implement.
 }
 
 static bool

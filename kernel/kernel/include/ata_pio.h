@@ -74,7 +74,7 @@ int ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *sr
 
 // blkdev interface.
 struct blkdev ata_pio_blkdev_create(size_t blkdev_id, struct ata_pio_dev *dev);
-void ata_pio_blkdev_destroy(struct blkdev *blkdev);
+void ata_pio_blkdev_driver_destroy(void *driver_data);
 int ata_pio_blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n);
 int ata_pio_blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src, size_t n);
 
