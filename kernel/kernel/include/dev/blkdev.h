@@ -5,12 +5,15 @@
 
 #include "kdef.h"
 
+enum blkdev_dev_type {
+	BDT_DISK_DRIVE = 0,
+};
+
+enum blkdev_driver {
+	BD_ATA_PIO = 0,
+};
+
 struct blkdev {
-	// the kernel will attempt to give every block device a unique name that
-	// indicates what kind of device it is and what driver it is using:
-	// `dd/atapio/...` - disk drive, ATA PIO driver.
-	char name[32];
-	
 	// whichever driver this is a block device over will store its
 	// driver-specific data here.
 	void *driver_data;
@@ -23,11 +26,11 @@ struct blkdev {
 	int (*rd)(struct blkdev *, void *, blk_addr_t, size_t);
 	int (*wr)(struct blkdev *, blk_addr_t, void const *, size_t);
 	
-	// TODO: functions for block device statistics requests.
+	unsigned char dev_type, driver;
 };
 
 void blkdevs_find(void);
 struct blkdev const *blkdevs_get(size_t *out_cnt);
-struct blkdev *blkdev_get(char const *name);
+struct blkdev *blkdev_get(enum blkdev_dev_type type, enum blkdev_driver driver, size_t which);
 
 #endif

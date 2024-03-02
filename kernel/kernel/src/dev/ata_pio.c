@@ -1,7 +1,9 @@
 #include "dev/ata_pio.h"
 
+#include "dev/blkdev.h"
 #include "katomic.h"
 #include "kutil.h"
+#include "mm/kheap.h"
 
 // max number of ATA PIO buses that can be cached.
 // more buses than this can exist and should work, but duplicate work will be
@@ -198,22 +200,39 @@ ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src,
 	return 1;
 }
 
+struct blkdev
+ata_pio_blkdev_create(size_t blkdev_id, struct ata_pio_dev *dev)
+{
+	struct blkdev blkdev = {
+		.destroy = ata_pio_blkdev_destroy,
+		.rd = ata_pio_blkdev_rd,
+		.wr = ata_pio_blkdev_wr,
+		.dev_type = BDT_DISK_DRIVE,
+		.driver = BD_ATA_PIO,
+	};
+	blkdev.driver_data = kheap_alloc(sizeof(*dev));
+	*(struct ata_pio_dev *)blkdev.driver_data = *dev;
+	
+	return blkdev;
+}
+
 void
 ata_pio_blkdev_destroy(struct blkdev *blkdev)
 {
+	kheap_free(blkdev->driver_data);
 }
 
 int
 ata_pio_blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n)
 {
-	return 1;
+	return ata_pio_dev_rd(blkdev->driver_data, dst, src, n);
 }
 
 int
 ata_pio_blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src,
                   size_t n)
 {
-	return 1;
+	return ata_pio_dev_wr(blkdev->driver_data, dst, src, n);
 }
 
 static void

@@ -1,6 +1,7 @@
 #include <limine.h>
 
 #include "arch/arch_master.h"
+#include "dev/blkdev.h"
 #include "dev/fb.h"
 #include "dev/serial_port.h"
 #include "kutil.h"
@@ -20,6 +21,8 @@ static struct limine_smp_request volatile smp_req = {
 void
 _start(void)
 {
+	ku_println(LT_INFO, "main: beginning init");
+	
 	if (sp_init())
 		ku_hang();
 	if (fb_init())
@@ -27,8 +30,6 @@ _start(void)
 	if (meml_init())
 		ku_hang();
 	pmm_init();
-	if (kheap_init())
-		ku_hang();
 	arch_master_init();
 	
 	for (size_t i = 0; i < smp_req.response->cpu_count; ++i) {
@@ -50,5 +51,10 @@ static void
 init_stage_2(void)
 {
 	ku_println(LT_INFO, "main: reached init stage 2");
+	
+	if (kheap_init())
+		ku_hang();
+	blkdevs_find();
+	
 	ku_hang();
 }

@@ -231,5 +231,5 @@ print_fmt_u(uint64_t n, uint32_t mod)
 static void
 primt_fmt_s(char const *s, uint32_t mod)
 {
-	// TODO: implement string formatting.
+	sp_write_str(s);
 }
