@@ -1,8 +1,8 @@
-#include "dev/blkdev.h"
+#include "blkdev.h"
 
-#include "dev/ata_pio.h"
+#include "ata_pio.h"
 #include "kutil.h"
-#include "sys/port.h"
+#include "port.h"
 
 #define MAX_BLKDEV_CNT 64
 

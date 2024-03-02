@@ -1,11 +1,11 @@
-#ifndef DEV_ATA_PIO_H
-#define DEV_ATA_PIO_H
+#ifndef ATA_PIO_H
+#define ATA_PIO_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "kdef.h"
-#include "sys/port.h"
+#include "port.h"
 
 struct blkdev;
 

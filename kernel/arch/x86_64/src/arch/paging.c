@@ -4,7 +4,7 @@
 
 #include "arch/autil.h"
 #include "kdef.h"
-#include "mm/pmm.h"
+#include "pmm.h"
 
 typedef uint64_t page_dir_t;
 

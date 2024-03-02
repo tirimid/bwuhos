@@ -1,5 +1,5 @@
-#ifndef DEV_SERIAL_PORT_H
-#define DEV_SERIAL_PORT_H
+#ifndef SERIAL_PORT_H
+#define SERIAL_PORT_H
 
 int sp_init(void);
 char sp_read_ch(void);

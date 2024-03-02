@@ -1,8 +1,8 @@
-#include "dev/serial_port.h"
+#include "serial_port.h"
 
 #include "katomic.h"
 #include "kdef.h"
-#include "sys/port.h"
+#include "port.h"
 
 #define PORT_COM1 0x3f8
 

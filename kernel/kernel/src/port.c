@@ -1,4 +1,4 @@
-#include "sys/port.h"
+#include "port.h"
 
 #if defined(K_ARCH_X86_64)
 #include "arch/port.h"

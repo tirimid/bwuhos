@@ -1,14 +1,14 @@
 #include <limine.h>
 
 #include "arch/arch_master.h"
-#include "dev/blkdev.h"
-#include "dev/fb.h"
-#include "dev/serial_port.h"
+#include "blkdev.h"
+#include "fb.h"
 #include "kutil.h"
-#include "mm/kheap.h"
-#include "mm/mem_layout.h"
-#include "mm/pmm.h"
-#include "mm/vmm.h"
+#include "kheap.h"
+#include "mem_layout.h"
+#include "pmm.h"
+#include "serial_port.h"
+#include "vmm.h"
 
 static void init_other_cpu(struct limine_smp_info *cpu);
 static void init_stage_2(void);

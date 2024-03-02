@@ -1,11 +1,11 @@
-#include "mm/pmm.h"
+#include "pmm.h"
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "katomic.h"
 #include "kutil.h"
-#include "mm/mem_layout.h"
+#include "mem_layout.h"
 
 #define PAGE_STK_CAP 256
 

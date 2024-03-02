@@ -1,11 +1,11 @@
-#include "mm/vmm.h"
+#include "vmm.h"
 
 #include <limine.h>
 
 #include "kdef.h"
 #include "kutil.h"
-#include "mm/mem_layout.h"
-#include "mm/pmm.h"
+#include "mem_layout.h"
+#include "pmm.h"
 
 #if defined(K_ARCH_X86_64)
 #include "arch/cpu.h"

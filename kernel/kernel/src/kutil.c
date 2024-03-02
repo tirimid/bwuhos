@@ -1,7 +1,7 @@
 #include "kutil.h"
 
-#include "dev/serial_port.h"
 #include "katomic.h"
+#include "serial_port.h"
 
 #if defined(K_ARCH_X86_64)
 #include "arch/autil.h"

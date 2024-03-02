@@ -1,9 +1,9 @@
-#include "dev/ata_pio.h"
+#include "ata_pio.h"
 
-#include "dev/blkdev.h"
+#include "blkdev.h"
 #include "katomic.h"
+#include "kheap.h"
 #include "kutil.h"
-#include "mm/kheap.h"
 
 // max number of ATA PIO buses that can be cached.
 // more buses than this can exist and should work, but duplicate work will be

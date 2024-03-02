@@ -1,4 +1,4 @@
-#include "dev/fb.h"
+#include "fb.h"
 
 #include <limine.h>
 

@@ -2,7 +2,7 @@
 
 #include <stdarg.h>
 
-#include "dev/serial_port.h"
+#include "serial_port.h"
 
 void
 au_println(enum log_type type, char const *msg, ...)

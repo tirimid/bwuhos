@@ -1,5 +1,5 @@
-#ifndef MM_MEM_LAYOUT_H
-#define MM_MEM_LAYOUT_H
+#ifndef MEM_LAYOUT_H
+#define MEM_LAYOUT_H
 
 #include <stddef.h>
 

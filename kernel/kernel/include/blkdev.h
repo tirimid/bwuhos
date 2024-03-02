@@ -1,5 +1,5 @@
-#ifndef DEV_BLKDEV_H
-#define DEV_BLKDEV_H
+#ifndef BLKDEV_H
+#define BLKDEV_H
 
 #include <stddef.h>
 

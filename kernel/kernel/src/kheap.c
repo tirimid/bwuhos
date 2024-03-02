@@ -1,13 +1,14 @@
-#include "mm/kheap.h"
+#include "kheap.h"
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "katomic.h"
 #include "kdef.h"
 #include "kutil.h"
-#include "mm/pmm.h"
-#include "mm/vmm.h"
+#include "pmm.h"
+#include "vmm.h"
 
 #define KH_START 0xfffffbbb00000000
 #define KH_MAX_NPAGES 65536
@@ -22,6 +23,7 @@ static void *find_free(size_t n);
 
 static struct kh_ent *kh_head, *kh_tail;
 static size_t kh_npages;
+static k_mutex_t mutex;
 
 int
 kheap_init(void)
@@ -51,6 +53,8 @@ kheap_init(void)
 void *
 kheap_alloc(size_t n)
 {
+	k_mutex_lock(&mutex);
+	
 	struct kh_ent *new = find_free(n);
 	if (new) {
 		*new = (struct kh_ent){
@@ -61,6 +65,7 @@ kheap_alloc(size_t n)
 		kh_tail->next = new;
 		kh_tail = new;
 		
+		k_mutex_unlock(&mutex);
 		return (char *)new + sizeof(struct kh_ent);
 	}
 	
@@ -71,6 +76,7 @@ kheap_alloc(size_t n)
 		phys_addr_t paddr = pmm_alloc();
 		if (!paddr) {
 			ku_println(LT_ERR, "kheap: failed to alloc page for heap expansion!");
+			k_mutex_unlock(&mutex);
 			return NULL;
 		}
 		vmm_map_cur(paddr, (void *)(KH_START + PAGE_SIZE * kh_npages), VF_WRITE);
@@ -86,10 +92,12 @@ kheap_alloc(size_t n)
 			kh_tail->next = new;
 			kh_tail = new;
 			
+			k_mutex_unlock(&mutex);
 			return (char *)new + sizeof(struct kh_ent);
 		}
 	}
 	
+	k_mutex_unlock(&mutex);
 	return NULL;
 }
 
