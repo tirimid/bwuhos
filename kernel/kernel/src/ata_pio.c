@@ -53,6 +53,7 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	port_wr(bus_io_port + APIR_CMD, 0xec, PS_8); // IDENTIFY.
 	uint8_t status = port_rd(bus_io_port + APIR_STATUS, PS_8);
 	if (!status) {
+		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) reported status=0!", bus_io_port, dev_num);
 		k_mutex_unlock(&mutex);
 		return 1;
 	}
@@ -65,6 +66,7 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 		status = port_rd(bus_io_port + APIR_STATUS, PS_8);
 	
 	if (status & APS_ERR) {
+		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) reported status with ERR!", bus_io_port, dev_num);
 		k_mutex_unlock(&mutex);
 		return 1;
 	}
@@ -80,7 +82,7 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	out->support |= APDS_LBA * !!out->nsector;
 	
 	if (!(out->support & APDS_LBA)) {
-		ku_println(LT_ERR, "ata_pio: device at 0x%x (p) uses CHS which is unsupported!", bus_io_port);
+		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) uses CHS which is unsupported!", bus_io_port, dev_num);
 		k_mutex_unlock(&mutex);
 		return 1;
 	}
@@ -116,6 +118,7 @@ ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id)
 		status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
 	
 	if (status & APS_ERR) {
+		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) reported status with ERR upon ID!", dev->bus_io_port, dev->dev_num);
 		k_mutex_unlock(&mutex);
 		return 1;
 	}
@@ -135,8 +138,10 @@ ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src,
 		return 0;
 	
 	size_t max_sectors = dev->support & APDS_LBA_48 ? 0x10000 : 0x100;
-	if (nsector > max_sectors)
+	if (nsector > max_sectors) {
+		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) tried to read 0x%x/0x%x sectors!", dev->bus_io_port, dev->dev_num, nsector, max_sectors);
 		return 1;
+	}
 	
 	// for convenience, `nsector` is wrapped.
 	// that way you don't need to worry about adjusting for max read size
@@ -167,11 +172,11 @@ ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src,
 	
 	for (size_t i = 0; i < nsector; ++i) {
 		uint8_t status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
-		while (!(status & APS_DRQ) && !(APS_ERR))
+		while (status & APS_BSY && !(status & APS_ERR))
 			status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
 		
 		if (status & APS_ERR) {
-			ku_println(LT_ERR, "ata_pio: device at 0x%x (p) experienced a read failure at sector 0x%x + 0x%x!", dev->bus_io_port, src, i);
+			ku_println(LT_ERR, "ata_pio: device (0x%x:%x) experienced read failure at sector 0x%x + 0x%x!", dev->bus_io_port, dev->dev_num, src, i);
 			k_mutex_unlock(&mutex);
 			return 1;
 		}
@@ -201,21 +206,15 @@ ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src,
 }
 
 struct blkdev
-ata_pio_blkdev_create(size_t blkdev_id, struct ata_pio_dev *dev)
+ata_pio_blkdev_create(struct ata_pio_dev *dev)
 {
-	struct blkdev blkdev = {
-		.driver_destroy = ata_pio_blkdev_driver_destroy,
-		.rd = ata_pio_blkdev_rd,
-		.wr = ata_pio_blkdev_wr,
-		.nparts = 0,
-		.part_id = 0,
-		.dev_type = BDT_DISK_DRIVE,
-		.driver = BD_ATA_PIO,
-	};
-	blkdev.driver_data = kheap_alloc(sizeof(*dev));
-	*(struct ata_pio_dev *)blkdev.driver_data = *dev;
+	struct ata_pio_dev *driver_data = kheap_alloc(sizeof(*dev));
+	*driver_data = *dev;
 	
-	return blkdev;
+	return blkdev_create(driver_data, ata_pio_blkdev_driver_destroy,
+	                     ata_pio_blkdev_rd, ata_pio_blkdev_wr,
+	                     BDT_DISK_DRIVE, BD_ATA_PIO, 0, dev->sector_size,
+	                     dev->nsector);
 }
 
 void

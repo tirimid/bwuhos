@@ -22,6 +22,7 @@ static void primt_fmt_s(char const *s, uint32_t mod);
 void
 ku_hang(void)
 {
+	ku_println(LT_INFO, "hanging...");
 #if defined(K_ARCH_X86_64)
 	au_hang();
 #endif
@@ -225,7 +226,20 @@ print_fmt_b(uint64_t n, uint32_t mod)
 static void
 print_fmt_u(uint64_t n, uint32_t mod)
 {
-	// TODO: implement unsigned decimal formatting.
+	if (!n) {
+		sp_write_ch('0');
+		return;
+	}
+	
+	size_t nch = 0;
+	char text[21] = {0};
+	while (n > 0) {
+		++nch;
+		text[20 - nch] = '0' + n % 10;
+		n /= 10;
+	}
+	
+	sp_write_str(&text[20 - nch]);
 }
 
 static void

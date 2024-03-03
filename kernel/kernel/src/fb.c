@@ -119,8 +119,10 @@ fb_put_pixel(fb_id_t fb, uint64_t x, uint64_t y, uint8_t r, uint8_t g,
              uint8_t b)
 {
 	struct fb_info *info = &fbs[fb];
-	if (x >= info->width || y >= info->height)
+	if (x >= info->width || y >= info->height) {
+		ku_println(LT_ERR, "fb: cannot put pixel (%u, %u) out of bounds (%u, %u)!", x, y, info->width, info->height);
 		return 1;
+	}
 	
 	k_mutex_lock(&fb_mutexes[fb]);
 	

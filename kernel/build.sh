@@ -20,7 +20,7 @@ case $ARCH in
 esac
 
 echo -e "${ECHO_COLOR}[/kernel] building arch C sources\033[0m"
-mincbuild -vr conf/$ARCH/mcb_arch_c.conf
+mincbuild -r conf/$ARCH/mcb_arch_c.conf
 if [ $? -ne 0 ]
 then
 	echo -e "${ECHO_COLOR}[/kernel] failed to build arch C sources\033[0m"
@@ -28,7 +28,7 @@ then
 fi
 
 echo -e "${ECHO_COLOR}[/kernel] building arch assembly sources\033[0m"
-mincbuild -vr conf/$ARCH/mcb_arch_S.conf
+mincbuild -r conf/$ARCH/mcb_arch_S.conf
 if [ $? -ne 0 ]
 then
 	echo -e "${ECHO_COLOR}[/kernel] failed to build arch assembly sources\033[0m"
@@ -36,7 +36,7 @@ then
 fi
 
 echo -e "${ECHO_COLOR}[/kernel] building kernel C sources\033[0m"
-mincbuild -vr conf/$ARCH/mcb_kernel_c.conf
+mincbuild -r conf/$ARCH/mcb_kernel_c.conf
 if [ $? -ne 0 ]
 then
 	echo -e "${ECHO_COLOR}[/kernel] failed to build kernel C sources\033[0m"
@@ -44,7 +44,7 @@ then
 fi
 
 echo -e "${ECHO_COLOR}[/kernel] building kernel assembly sources\033[0m"
-mincbuild -vr conf/$ARCH/mcb_kernel_S.conf
+mincbuild -r conf/$ARCH/mcb_kernel_S.conf
 if [ $? -ne 0 ]
 then
 	echo -e "${ECHO_COLOR}[/kernel] failed to build kernel assembly sources\033[0m"

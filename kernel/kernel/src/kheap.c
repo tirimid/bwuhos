@@ -97,12 +97,19 @@ kheap_alloc(size_t n)
 		}
 	}
 	
+	ku_println(LT_ERR, "kheap: could not alloc memory!");
 	k_mutex_unlock(&mutex);
 	return NULL;
 }
 
 void
 kheap_free(void *addr)
+{
+	// TODO: implement.
+}
+
+void *
+kheap_realloc(void *p, size_t n)
 {
 	// TODO: implement.
 }

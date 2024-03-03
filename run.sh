@@ -24,7 +24,6 @@ case $ARCH in
 	x86_64)
 		qemu-system-x86_64 \
 			-cpu qemu64 \
-			-smp 4 \
 			-m 4G \
 			--no-reboot \
 			-d int -D emu_log.txt \
@@ -33,6 +32,9 @@ case $ARCH in
 			-hda bwuhos.img
 		;;
 esac
+
+# use for 4-core SMP:
+# -smp 4
 
 # QEmu arguments for AHCI SATA disk emulation:
 # -drive id=disk,file=bwuhos.img,if=none \

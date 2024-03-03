@@ -9,6 +9,7 @@
 #include "mem_layout.h"
 #include "pmm.h"
 #include "serial_port.h"
+#include "vfs.h"
 #include "vmm.h"
 
 static void init_other_cpu(struct limine_smp_info *cpu);
@@ -57,6 +58,11 @@ init_stage_2(void)
 		ku_hang();
 	blkdevs_find();
 	mbr_find();
+	vfs_auto_mount();
+	if (vfs_cnt_mounted() == 0) {
+		ku_println(LT_ERR, "main: no mounted drives!");
+		ku_hang();
+	}
 	
 	ku_hang();
 }

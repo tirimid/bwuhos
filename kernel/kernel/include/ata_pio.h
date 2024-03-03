@@ -4,10 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "blkdev.h"
 #include "kdef.h"
 #include "port.h"
-
-struct blkdev;
 
 // registers and bits implemented according to OSDev wiki.
 
@@ -73,7 +72,7 @@ int ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src, siz
 int ata_pio_dev_wr(struct ata_pio_dev const *dev, blk_addr_t dst, void const *src, size_t nsector);
 
 // blkdev interface.
-struct blkdev ata_pio_blkdev_create(size_t blkdev_id, struct ata_pio_dev *dev);
+struct blkdev ata_pio_blkdev_create(struct ata_pio_dev *dev);
 void ata_pio_blkdev_driver_destroy(void *driver_data);
 int ata_pio_blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n);
 int ata_pio_blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src, size_t n);

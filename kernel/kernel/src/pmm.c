@@ -82,6 +82,7 @@ pmm_alloc(void)
 	
 	// if no pages could be fed to stack, just return `PHYS_ADDR_NULL`.
 	if (!page_stk_size) {
+		ku_println(LT_ERR, "pmm: could not alloc page frame!");
 		k_mutex_unlock(&mutex);
 		return PHYS_ADDR_NULL;
 	}
