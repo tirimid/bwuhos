@@ -61,6 +61,7 @@ blkdev_register(struct blkdev *blkdev)
 	
 	blkdevs[blkdev_cnt++] = *blkdev;
 	ku_println(LT_INFO, "blkdev: registered %s (0x%x)", blkdev_info_str(blkdev), &blkdevs[blkdev_cnt - 1]);
+	
 	return &blkdevs[blkdev_cnt - 1];
 }
 

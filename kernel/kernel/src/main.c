@@ -64,5 +64,12 @@ init_stage_2(void)
 		ku_hang();
 	}
 	
+	// test file read.
+	struct vfs_file file;
+	if (vfs_open(&file, "1:misc/bwuhos.md", VFF_READ)) {
+		ku_println(LT_ERR, "main: failed to open test file!");
+		ku_hang();
+	}
+	
 	ku_hang();
 }

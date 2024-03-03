@@ -10,6 +10,49 @@
 // performed on selecting them.
 #define MAX_BUSES 4
 
+// registers and bits implemented according to OSDev wiki.
+
+enum io_reg {
+	IR_DATA = 0,
+	IR_ERR = 1,
+	IR_FEATS = 1,
+	IR_SECTOR_CNT = 2,
+	IR_SECTOR_NUM = 3,
+	IR_CYL_LOW = 4,
+	IR_CYL_HIGH = 5,
+	IR_DRIVE_SEL = 6,
+	IR_STATUS = 7,
+	IR_CMD = 7,
+};
+
+enum ctl_reg {
+	CR_ALT_STATUS = 0,
+	CR_DEV_CTL = 0,
+	CR_DRIVE_ADDR = 1,
+};
+
+enum err {
+	E_AMNF = 0x1,
+	E_TKZNF = 0x2,
+	E_ABRT = 0x4,
+	E_MCR = 0x8,
+	E_IDNF = 0x10,
+	E_MC = 0x20,
+	E_UNC = 0x40,
+	E_BBK = 0x80,
+};
+
+enum status {
+	S_ERR = 0x1,
+	S_IDX = 0x2,
+	S_CORR = 0x4,
+	S_DRQ = 0x8,
+	S_SRV = 0x10,
+	S_DF = 0x20,
+	S_RDY = 0x40,
+	S_BSY = 0x80,
+};
+
 // used solely for cached device selection.
 struct bus_info {
 	port_t io_port;
@@ -39,19 +82,19 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	// since support is not yet determined, we cannot know whether to write
 	// the 16 bit or 8 bit port registers.
 	// so, just write both for now, and save result in support.
-	port_wr(bus_io_port + APIR_SECTOR_CNT, 0, PS_16);
-	port_wr(bus_io_port + APIR_SECTOR_NUM, 0, PS_16);
-	port_wr(bus_io_port + APIR_CYL_LOW, 0, PS_16);
-	port_wr(bus_io_port + APIR_CYL_HIGH, 0, PS_16);
-	port_wr(bus_io_port + APIR_SECTOR_CNT, 0, PS_8);
-	port_wr(bus_io_port + APIR_SECTOR_NUM, 0, PS_8);
-	port_wr(bus_io_port + APIR_CYL_LOW, 0, PS_8);
-	port_wr(bus_io_port + APIR_CYL_HIGH, 0, PS_8);
+	port_wr(bus_io_port + IR_SECTOR_CNT, 0, PS_16);
+	port_wr(bus_io_port + IR_SECTOR_NUM, 0, PS_16);
+	port_wr(bus_io_port + IR_CYL_LOW, 0, PS_16);
+	port_wr(bus_io_port + IR_CYL_HIGH, 0, PS_16);
+	port_wr(bus_io_port + IR_SECTOR_CNT, 0, PS_8);
+	port_wr(bus_io_port + IR_SECTOR_NUM, 0, PS_8);
+	port_wr(bus_io_port + IR_CYL_LOW, 0, PS_8);
+	port_wr(bus_io_port + IR_CYL_HIGH, 0, PS_8);
 	
 	ku_spin_cycles(100);
 	
-	port_wr(bus_io_port + APIR_CMD, 0xec, PS_8); // IDENTIFY.
-	uint8_t status = port_rd(bus_io_port + APIR_STATUS, PS_8);
+	port_wr(bus_io_port + IR_CMD, 0xec, PS_8); // IDENTIFY.
+	uint8_t status = port_rd(bus_io_port + IR_STATUS, PS_8);
 	if (!status) {
 		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) reported status=0!", bus_io_port, dev_num);
 		k_mutex_unlock(&mutex);
@@ -59,13 +102,13 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	}
 	
 	// TODO: check for non-standard ATAPI and give error if found.
-	while (status & APS_BSY)
-		status = port_rd(bus_io_port + APIR_STATUS, PS_8);
+	while (status & S_BSY)
+		status = port_rd(bus_io_port + IR_STATUS, PS_8);
 	
-	while (!(status & APS_DRQ) && !(status & APS_ERR))
-		status = port_rd(bus_io_port + APIR_STATUS, PS_8);
+	while (!(status & S_DRQ) && !(status & S_ERR))
+		status = port_rd(bus_io_port + IR_STATUS, PS_8);
 	
-	if (status & APS_ERR) {
+	if (status & S_ERR) {
 		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) reported status with ERR!", bus_io_port, dev_num);
 		k_mutex_unlock(&mutex);
 		return 1;
@@ -73,7 +116,7 @@ ata_pio_dev_get(struct ata_pio_dev *out, port_t bus_io_port,
 	
 	uint16_t id_buf[256];
 	for (size_t i = 0; i < 256; ++i)
-		id_buf[i] = port_rd(bus_io_port + APIR_DATA, PS_16);
+		id_buf[i] = port_rd(bus_io_port + IR_DATA, PS_16);
 	
 	out->sector_size = id_buf[51];
 	out->nsector = id_buf[60] | (size_t)id_buf[61] << 16;
@@ -99,32 +142,32 @@ ata_pio_dev_id(struct ata_pio_dev const *dev, uint16_t *out_id)
 	sel_drive(dev->bus_io_port, dev->dev_num, 0xa | dev->dev_num);
 	
 	enum port_size ps = dev->support & APDS_LBA_48 ? PS_16 : PS_8;
-	port_wr(dev->bus_io_port + APIR_SECTOR_CNT, 0, ps);
-	port_wr(dev->bus_io_port + APIR_SECTOR_NUM, 0, ps);
-	port_wr(dev->bus_io_port + APIR_CYL_LOW, 0, ps);
-	port_wr(dev->bus_io_port + APIR_CYL_HIGH, 0, ps);
+	port_wr(dev->bus_io_port + IR_SECTOR_CNT, 0, ps);
+	port_wr(dev->bus_io_port + IR_SECTOR_NUM, 0, ps);
+	port_wr(dev->bus_io_port + IR_CYL_LOW, 0, ps);
+	port_wr(dev->bus_io_port + IR_CYL_HIGH, 0, ps);
 	
 	ku_spin_cycles(100);
 	
-	port_wr(dev->bus_io_port + APIR_CMD, 0xec, PS_8); // IDENTIFY.
+	port_wr(dev->bus_io_port + IR_CMD, 0xec, PS_8); // IDENTIFY.
 	
-	uint8_t status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
+	uint8_t status = port_rd(dev->bus_io_port + IR_STATUS, PS_8);
 	
 	// TODO: check for non-standard ATAPI and give error if found.
-	while (status & APS_BSY)
-		status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
+	while (status & S_BSY)
+		status = port_rd(dev->bus_io_port + IR_STATUS, PS_8);
 	
-	while (!(status & APS_DRQ) && !(status & APS_ERR))
-		status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
+	while (!(status & S_DRQ) && !(status & S_ERR))
+		status = port_rd(dev->bus_io_port + IR_STATUS, PS_8);
 	
-	if (status & APS_ERR) {
+	if (status & S_ERR) {
 		ku_println(LT_ERR, "ata_pio: device (0x%x:%x) reported status with ERR upon ID!", dev->bus_io_port, dev->dev_num);
 		k_mutex_unlock(&mutex);
 		return 1;
 	}
 	
 	for (size_t i = 0; i < 256; ++i)
-		out_id[i] = port_rd(dev->bus_io_port + APIR_DATA, PS_16);
+		out_id[i] = port_rd(dev->bus_io_port + IR_DATA, PS_16);
 	
 	k_mutex_unlock(&mutex);
 	return 0;
@@ -152,37 +195,37 @@ ata_pio_dev_rd(struct ata_pio_dev const *dev, void *dst, blk_addr_t src,
 	
 	if (dev->support & APDS_LBA_48) {
 		sel_drive(dev->bus_io_port, dev->dev_num, 0xe0 | dev->dev_num << 4);
-		port_wr(dev->bus_io_port + APIR_SECTOR_CNT, nsector >> 8, PS_8);
-		port_wr(dev->bus_io_port + APIR_SECTOR_NUM, src >> 24, PS_8);
-		port_wr(dev->bus_io_port + APIR_CYL_LOW, src >> 32, PS_8);
-		port_wr(dev->bus_io_port + APIR_CYL_HIGH, src >> 40, PS_8);
-		port_wr(dev->bus_io_port + APIR_SECTOR_CNT, nsector, PS_8);
-		port_wr(dev->bus_io_port + APIR_SECTOR_NUM, src, PS_8);
-		port_wr(dev->bus_io_port + APIR_CYL_LOW, src >> 8, PS_8);
-		port_wr(dev->bus_io_port + APIR_CYL_HIGH, src >> 16, PS_8);
-		port_wr(dev->bus_io_port + APIR_CMD, 0x24, PS_8); // READ EXT.
+		port_wr(dev->bus_io_port + IR_SECTOR_CNT, nsector >> 8, PS_8);
+		port_wr(dev->bus_io_port + IR_SECTOR_NUM, src >> 24, PS_8);
+		port_wr(dev->bus_io_port + IR_CYL_LOW, src >> 32, PS_8);
+		port_wr(dev->bus_io_port + IR_CYL_HIGH, src >> 40, PS_8);
+		port_wr(dev->bus_io_port + IR_SECTOR_CNT, nsector, PS_8);
+		port_wr(dev->bus_io_port + IR_SECTOR_NUM, src, PS_8);
+		port_wr(dev->bus_io_port + IR_CYL_LOW, src >> 8, PS_8);
+		port_wr(dev->bus_io_port + IR_CYL_HIGH, src >> 16, PS_8);
+		port_wr(dev->bus_io_port + IR_CMD, 0x24, PS_8); // READ EXT.
 	} else {
 		sel_drive(dev->bus_io_port, dev->dev_num, 0x40 | dev->dev_num << 4);
-		port_wr(dev->bus_io_port + APIR_SECTOR_CNT, nsector, PS_8);
-		port_wr(dev->bus_io_port + APIR_SECTOR_NUM, src, PS_8);
-		port_wr(dev->bus_io_port + APIR_CYL_LOW, src >> 8, PS_8);
-		port_wr(dev->bus_io_port + APIR_CYL_HIGH, src >> 16, PS_8);
-		port_wr(dev->bus_io_port + APIR_CMD, 0x20, PS_8); // READ.
+		port_wr(dev->bus_io_port + IR_SECTOR_CNT, nsector, PS_8);
+		port_wr(dev->bus_io_port + IR_SECTOR_NUM, src, PS_8);
+		port_wr(dev->bus_io_port + IR_CYL_LOW, src >> 8, PS_8);
+		port_wr(dev->bus_io_port + IR_CYL_HIGH, src >> 16, PS_8);
+		port_wr(dev->bus_io_port + IR_CMD, 0x20, PS_8); // READ.
 	}
 	
 	for (size_t i = 0; i < nsector; ++i) {
-		uint8_t status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
-		while (status & APS_BSY && !(status & APS_ERR))
-			status = port_rd(dev->bus_io_port + APIR_STATUS, PS_8);
+		uint8_t status = port_rd(dev->bus_io_port + IR_STATUS, PS_8);
+		while (status & S_BSY && !(status & S_ERR))
+			status = port_rd(dev->bus_io_port + IR_STATUS, PS_8);
 		
-		if (status & APS_ERR) {
+		if (status & S_ERR) {
 			ku_println(LT_ERR, "ata_pio: device (0x%x:%x) experienced read failure at sector 0x%x + 0x%x!", dev->bus_io_port, dev->dev_num, src, i);
 			k_mutex_unlock(&mutex);
 			return 1;
 		}
 		
 		for (size_t j = 0; j < dev->sector_size / 2; ++j)
-			*((uint16_t *)dst + j) = port_rd(dev->bus_io_port + APIR_DATA, PS_16);
+			*((uint16_t *)dst + j) = port_rd(dev->bus_io_port + IR_DATA, PS_16);
 		
 		// 400ns delay is suggested.
 		// instead, I'm just going to wing it and hope shit doesn't die.
@@ -258,7 +301,7 @@ sel_drive(port_t bus_io_port, uint8_t dev_num, uint8_t sel_data)
 			.sel_data = sel_data,
 		};
 		
-		port_wr(bus_io_port + APIR_DRIVE_SEL, sel_data, PS_8);
+		port_wr(bus_io_port + IR_DRIVE_SEL, sel_data, PS_8);
 		ku_spin_cycles(1000);
 		
 		return;
@@ -272,7 +315,7 @@ sel_drive(port_t bus_io_port, uint8_t dev_num, uint8_t sel_data)
 			bus_cache[which].sel_data = sel_data;
 		}
 		
-		port_wr(bus_io_port + APIR_DRIVE_SEL, sel_data, PS_8);
+		port_wr(bus_io_port + IR_DRIVE_SEL, sel_data, PS_8);
 		ku_spin_cycles(1000);
 	}
 }

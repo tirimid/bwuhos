@@ -97,10 +97,58 @@ vfs_unmount(vfs_drive_id_t id)
 	// TODO: implement.
 }
 
-struct vfs_file
-vfs_open(char const *path, uint8_t flags)
+int
+vfs_open(struct vfs_file *out, char const *path, uint8_t flags)
 {
-	// TODO: implement.
+	// parse drive ID out of path.
+	size_t drive_id_ch_cnt = 0;
+	while (path[drive_id_ch_cnt] && path[drive_id_ch_cnt] != ':')
+		++drive_id_ch_cnt;
+	
+	if (!drive_id_ch_cnt || drive_id_ch_cnt > 3) {
+		ku_println(LT_ERR, "vfs: path has invalid drive ID - %s!", path);
+		return 1;
+	}
+	
+	int drive_id;
+	for (size_t i = 0; i < drive_id_ch_cnt; ++i) {
+		if (path[i] < '0' || path[i] > '9') {
+			ku_println(LT_ERR, "vfs: path has invalid drive ID - %s!", path);
+			return 1;
+		}
+		
+		int n = path[i] - '0';
+		
+		// multiply by correct decimal magnitude.
+		for (size_t j = 0; j < drive_id_ch_cnt - i - 1; ++j)
+			n *= 10;
+		
+		drive_id += n;
+	}
+	
+	if (drive_id < 1 || drive_id > sizeof(drives) / sizeof(drives[0])) {
+		ku_println(LT_ERR, "vfs: path has invalid drive ID - %s!", path);
+		return 1;
+	}
+	
+	// validate ID mount status.
+	if (!(drives[drive_id - 1].flags & DF_MOUNTED)) {
+		ku_println(LT_ERR, "vfs: tried to open path on unmounted drive (%u)!", drive_id);
+		return 1;
+	}
+	
+	// open file.
+	vfs_file_id_t fid = drives[drive_id - 1].driver.open(path + drive_id_ch_cnt + 1, flags);
+	if (!fid) {
+		ku_println(LT_ERR, "vfs: FS driver failed to open path - %s!", path);
+		return 1;
+	}
+
+	*out = (struct vfs_file){
+		.drive = drive_id,
+		.file = fid,
+	};
+	return 0;
 }
 
 void
@@ -151,7 +199,7 @@ find_slot(vfs_drive_id_t *out_id)
 {
 	for (size_t i = 0; i < sizeof(drives) / sizeof(drives[0]); ++i) {
 		if (!(drives[i].flags & DF_MOUNTED)) {
-			*out_id = i;
+			*out_id = i + 1;
 			return &drives[i];
 		}
 	}

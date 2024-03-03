@@ -8,7 +8,7 @@
 // TODO: use mutexes to protect VFS.
 
 #define VFS_DRIVE_ID_NULL 0
-#define VFS_FILE_HANDLE_NULL 0
+#define VFS_FILE_ID_NULL 0
 
 // 0 reserved as failure value.
 // for this reason, drive numbers begin at 1 and drive ids are always positive.
@@ -57,7 +57,7 @@ size_t vfs_cnt_mounted(void);
 vfs_drive_id_t vfs_mount(struct blkdev *blkdev, enum vfs_fs fs);
 void vfs_unmount(vfs_drive_id_t id);
 
-struct vfs_file vfs_open(char const *path, uint8_t flags);
+int vfs_open(struct vfs_file *out, char const *path, uint8_t flags);
 void vfs_close(struct vfs_file *file);
 size_t vfs_abs_tell(struct vfs_file const *file);
 int vfs_seek(struct vfs_file *file, enum vfs_whence whence, long long off);

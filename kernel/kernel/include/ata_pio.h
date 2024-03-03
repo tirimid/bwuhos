@@ -8,49 +8,6 @@
 #include "kdef.h"
 #include "port.h"
 
-// registers and bits implemented according to OSDev wiki.
-
-enum ata_pio_io_reg {
-	APIR_DATA = 0,
-	APIR_ERR = 1,
-	APIR_FEATS = 1,
-	APIR_SECTOR_CNT = 2,
-	APIR_SECTOR_NUM = 3,
-	APIR_CYL_LOW = 4,
-	APIR_CYL_HIGH = 5,
-	APIR_DRIVE_SEL = 6,
-	APIR_STATUS = 7,
-	APIR_CMD = 7,
-};
-
-enum ata_pio_ctl_reg {
-	APCR_ALT_STATUS = 0,
-	APCR_DEV_CTL = 0,
-	APCR_DRIVE_ADDR = 1,
-};
-
-enum ata_pio_err {
-	APE_AMNF = 0x1,
-	APE_TKZNF = 0x2,
-	APE_ABRT = 0x4,
-	APE_MCR = 0x8,
-	APE_IDNF = 0x10,
-	APE_MC = 0x20,
-	APE_UNC = 0x40,
-	APE_BBK = 0x80,
-};
-
-enum ata_pio_status {
-	APS_ERR = 0x1,
-	APS_IDX = 0x2,
-	APS_CORR = 0x4,
-	APS_DRQ = 0x8,
-	APS_SRV = 0x10,
-	APS_DF = 0x20,
-	APS_RDY = 0x40,
-	APS_BSY = 0x80,
-};
-
 enum ata_pio_dev_support {
 	APDS_LBA = 0x1,
 	APDS_LBA_48 = 0x2,
