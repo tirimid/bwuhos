@@ -138,7 +138,8 @@ vfs_open(struct vfs_file *out, char const *path, uint8_t flags)
 	}
 	
 	// open file.
-	vfs_file_id_t fid = drives[drive_id - 1].driver.open(path + drive_id_ch_cnt + 1, flags);
+	struct vfs_fs_driver *driver = &drives[drive_id - 1].driver;
+	vfs_file_id_t fid = driver->open(driver, path + drive_id_ch_cnt + 1, flags);
 	if (!fid) {
 		ku_println(LT_ERR, "vfs: FS driver failed to open path - %s!", path);
 		return 1;

@@ -43,12 +43,12 @@ struct vfs_fs_driver {
 	
 	void (*driver_destroy)(void *);
 	
-	vfs_file_id_t (*open)(char const *path, uint8_t);
-	void (*close)(vfs_file_id_t);
-	size_t (*abs_tell)(vfs_file_id_t);
-	int (*seek)(vfs_file_id_t, enum vfs_whence, long long);
-	int (*rd)(vfs_file_id_t, uint8_t *dst, size_t n);
-	int (*wr)(vfs_file_id_t, uint8_t const *src, size_t n);
+	vfs_file_id_t (*open)(struct vfs_fs_driver *, char const *path, uint8_t);
+	void (*close)(struct vfs_fs_driver *, vfs_file_id_t);
+	size_t (*abs_tell)(struct vfs_fs_driver *, vfs_file_id_t);
+	int (*seek)(struct vfs_fs_driver *, vfs_file_id_t, enum vfs_whence, long long);
+	int (*rd)(struct vfs_fs_driver *, vfs_file_id_t, uint8_t *dst, size_t n);
+	int (*wr)(struct vfs_fs_driver *, vfs_file_id_t, uint8_t const *src, size_t n);
 };
 
 void vfs_auto_mount(void);

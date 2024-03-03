@@ -3,10 +3,14 @@
 
 // TODO: use mutexes to protect filesystem.
 
+#include <stddef.h>
 #include <stdint.h>
 
+#include "blk_cache.h"
 #include "blkdev.h"
 #include "vfs.h"
+
+#define FAT_DIRENT_EOF 0
 
 // only FAT16 with VFAT is supported.
 
@@ -22,51 +26,49 @@ enum fat_dirent_attr {
 	FDA_LFN = FDA_RO | FDA_HIDDEN | FDA_SYS | FDA_VOL_ID,
 };
 
-enum fat_file_flag {
-	FFF_OPEN = 0x1,
+struct fat_dirent_info {
+	char name[512]; // driver will translate UCS-2 names to normal chars.
+	
+	uint8_t time_mk_h, time_mk_m, time_mk_s;
+	uint16_t date_mk_y;
+	uint8_t date_mk_m, date_mk_d;
+	
+	uint16_t date_acc_y;
+	uint8_t date_acc_m, date_acc_d;
+	
+	uint8_t time_mod_h, time_mod_m, time_mod_s;
+	uint16_t date_mod_y;
+	uint8_t date_mod_m, date_mod_d;
+	
+	uint8_t attr;
+	
+	size_t size;
 };
 
-struct fat_dirent_std {
-	char name[11];
-	uint8_t attr;
-	uint8_t res;
-	uint8_t time_mk_s100; // 100ths of a second.
-	uint16_t time_mk_hms, time_mk_date;
-	uint16_t time_acc_date;
-	uint16_t first_cluster_1;
-	uint16_t time_mod_hms, time_mod_date;
-	uint16_t first_cluster_0;
-	uint32_t file_size;
-} __attribute__((packed));
-
-struct fat_dirent_lfn {
-	uint8_t order;
-	uint16_t ent_0[5];
-	uint8_t attr;
-	uint8_t type;
-	uint8_t chk;
-	uint16_t ent_1[6];
-	uint16_t zero;
-	uint16_t ent_2[2];
-} __attribute__((packed));
-
 struct fat_driver {
-	struct blkdev *blkdev;
+	struct blk_cache blk_cache;
+	size_t sector_size;
+	size_t first_data_sector;
 	size_t sector_cnt, root_sector_cnt, data_sector_cnt;
 	size_t cluster_cnt;
 };
 
 int fat_verify(struct blkdev *blkdev);
 int fat_driver_create(struct fat_driver *out, struct blkdev *blkdev);
+uintptr_t fat_get_root(struct fat_driver *driver);
+uintptr_t fat_next_dirent(struct fat_driver *driver, uintptr_t cur_de);
+int fat_get_dirent_info(struct fat_driver *driver, struct fat_dirent_info *out, uintptr_t de);
+uintptr_t fat_find_dirent(struct fat_driver *driver, uintptr_t cur_de, char const *name);
+int fat_read_file(struct fat_driver *driver, void *dst, uintptr_t de, uintptr_t file_pos, size_t n);
 
 // VFS interface.
 struct vfs_fs_driver fat_vfs_fs_driver_create(struct fat_driver *driver);
 void fat_vfs_driver_destroy(void *driver_data);
-vfs_file_id_t fat_vfs_open(char const *path, uint8_t flags);
-void fat_vfs_close(vfs_file_id_t fid);
-size_t fat_vfs_abs_tell(vfs_file_id_t fid);
-int fat_vfs_seek(vfs_file_id_t fid, enum vfs_whence whence, long long off);
-int fat_vfs_rd(vfs_file_id_t fid, uint8_t *dst, size_t n);
-int fat_vfs_wr(vfs_file_id_t fid, uint8_t const *src, size_t n);
+vfs_file_id_t fat_vfs_open(struct vfs_fs_driver *driver, char const *path, uint8_t flags);
+void fat_vfs_close(struct vfs_fs_driver *driver, vfs_file_id_t fid);
+size_t fat_vfs_abs_tell(struct vfs_fs_driver *driver, vfs_file_id_t fid);
+int fat_vfs_seek(struct vfs_fs_driver *driver, vfs_file_id_t fid, enum vfs_whence whence, long long off);
+int fat_vfs_rd(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t *dst, size_t n);
+int fat_vfs_wr(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t const *src, size_t n);
 
 #endif

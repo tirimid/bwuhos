@@ -8,6 +8,7 @@
 #include "mbr.h"
 #include "mem_layout.h"
 #include "pmm.h"
+#include "rtc.h"
 #include "serial_port.h"
 #include "vfs.h"
 #include "vmm.h"
@@ -23,10 +24,12 @@ static struct limine_smp_request volatile smp_req = {
 void
 _start(void)
 {
-	ku_println(LT_INFO, "main: beginning init");
-	
 	if (sp_init())
 		ku_hang();
+	
+	ku_println(LT_INFO, "main: beginning post-serial-port init");
+	
+	rtc_init();
 	if (fb_init())
 		ku_hang();
 	if (meml_init())
@@ -64,10 +67,14 @@ init_stage_2(void)
 		ku_hang();
 	}
 	
+	// test RTC.
+	struct rtc_time time = rtc_get_time();
+	ku_println(LT_DEBUG, "%u-%u-%u %u:%u:%u", time.year, time.month, time.day, time.hour, time.min, time.sec);
+	
 	// test file read.
 	struct vfs_file file;
 	if (vfs_open(&file, "1:misc/bwuhos.md", VFF_READ)) {
-		ku_println(LT_ERR, "main: failed to open test file!");
+		ku_println(LT_DEBUG, "main: failed to open test file!");
 		ku_hang();
 	}
 	

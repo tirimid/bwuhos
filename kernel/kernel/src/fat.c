@@ -20,8 +20,29 @@ struct bpb {
 	uint32_t large_sector_cnt;
 } __attribute__((packed));
 
-int fat_verify(struct blkdev *blkdev);
-int fat_driver_create(struct fat_driver *out, struct blkdev *blkdev);
+struct dirent_std {
+	char name[11];
+	uint8_t attr;
+	uint8_t res;
+	uint8_t time_mk_s100; // 100ths of a second.
+	uint16_t time_mk_hms, time_mk_date;
+	uint16_t time_acc_date;
+	uint16_t first_cluster_1;
+	uint16_t time_mod_hms, time_mod_date;
+	uint16_t first_cluster_0;
+	uint32_t file_size;
+} __attribute__((packed));
+
+struct dirent_lfn {
+	uint8_t order;
+	uint16_t ent_0[5];
+	uint8_t attr;
+	uint8_t type;
+	uint8_t chk;
+	uint16_t ent_1[6];
+	uint16_t zero;
+	uint16_t ent_2[2];
+} __attribute__((packed));
 
 int
 fat_verify(struct blkdev *blkdev)
@@ -82,9 +103,12 @@ fat_driver_create(struct fat_driver *out, struct blkdev *blkdev)
 	size_t root_sector_cnt = (32 * bpb->root_dirent_cnt + bpb->sector_size - 1) / bpb->sector_size;
 	size_t data_sector_cnt = sector_cnt - bpb->res_sector_cnt - bpb->fat_cnt * bpb->fat_sectors - root_sector_cnt;
 	size_t cluster_cnt = data_sector_cnt / bpb->cluster_size;
+	size_t first_data_sector = bpb->res_sector_cnt + bpb->fat_cnt * bpb->fat_sectors + root_sector_cnt;
 	
 	*out = (struct fat_driver){
-		.blkdev = blkdev,
+		.blk_cache = blk_cache_create(blkdev),
+		.sector_size = bpb->sector_size,
+		.first_data_sector = first_data_sector,
 		.sector_cnt = sector_cnt,
 		.root_sector_cnt = root_sector_cnt,
 		.data_sector_cnt = data_sector_cnt,
@@ -111,6 +135,38 @@ fat_vfs_fs_driver_create(struct fat_driver *driver)
 	return vfs_driver;
 }
 
+uintptr_t
+fat_get_root(struct fat_driver *driver)
+{
+	return driver->sector_size * (driver->first_data_sector - driver->root_sector_cnt);
+}
+
+uintptr_t
+fat_next_dirent(struct fat_driver *driver, uintptr_t cur_de)
+{
+	// TODO: implement.
+}
+
+int
+fat_get_dirent_info(struct fat_driver *driver, struct fat_dirent_info *out,
+                    uintptr_t de)
+{
+	// TODO: implement.
+}
+
+uintptr_t
+fat_find_dirent(struct fat_driver *driver, uintptr_t cur_de, char const *path)
+{
+	// TODO: implement.
+}
+
+int
+fat_read_file(struct fat_driver *driver, void *dst, uintptr_t de,
+              uintptr_t file_pos, size_t n)
+{
+	// TODO: implement.
+}
+
 void
 fat_vfs_driver_destroy(void *driver_data)
 {
@@ -118,7 +174,7 @@ fat_vfs_driver_destroy(void *driver_data)
 }
 
 vfs_file_id_t
-fat_vfs_open(char const *path, uint8_t flags)
+fat_vfs_open(struct vfs_fs_driver *driver, char const *path, uint8_t flags)
 {
 	// TODO: implement.
 	
@@ -126,31 +182,34 @@ fat_vfs_open(char const *path, uint8_t flags)
 }
 
 void
-fat_vfs_close(vfs_file_id_t fid)
+fat_vfs_close(struct vfs_fs_driver *driver, vfs_file_id_t fid)
 {
 	// TODO: implement.
 }
 
 size_t
-fat_vfs_abs_tell(vfs_file_id_t fid)
+fat_vfs_abs_tell(struct vfs_fs_driver *driver, vfs_file_id_t fid)
 {
 	// TODO: implement.
 }
 
 int
-fat_vfs_seek(vfs_file_id_t fid, enum vfs_whence whence, long long off)
+fat_vfs_seek(struct vfs_fs_driver *driver, vfs_file_id_t fid,
+             enum vfs_whence whence, long long off)
 {
 	// TODO: implement.
 }
 
 int
-fat_vfs_rd(vfs_file_id_t fid, uint8_t *dst, size_t n)
+fat_vfs_rd(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t *dst,
+           size_t n)
 {
 	// TODO: implement.
 }
 
 int
-fat_vfs_wr(vfs_file_id_t fid, uint8_t const *src, size_t n)
+fat_vfs_wr(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t const *src,
+           size_t n)
 {
 	// TODO: implement.
 }
