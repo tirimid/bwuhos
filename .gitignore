@@ -5,6 +5,9 @@
 /kernel/arch/x86_64/lib
 /kernel/kbin
 /kernel/kbin.debug
+/os-prog/lib
+/os-prog/bin
+/root/bin
 /root/boot/kbin
 /root/boot/limine-bios-cd.bin
 /root/boot/limine-uefi-cd.bin

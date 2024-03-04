@@ -47,6 +47,7 @@ struct dirent_lfn {
 } __attribute__((packed));
 
 static uintptr_t cluster_to_pos(struct fat_driver const *driver, size_t cluster);
+static size_t pos_to_cluster(struct fat_driver const *driver, uintptr_t pos);
 static struct fat_file_desc *find_slot(struct fat_driver *driver, vfs_file_id_t *out_id);
 
 int
@@ -506,6 +507,12 @@ cluster_to_pos(struct fat_driver const *driver, size_t cluster)
 {
 	size_t sector_off = (cluster - 2) * driver->cluster_size;
 	return driver->sector_size * (driver->first_data_sector + sector_off);
+}
+
+static size_t
+pos_to_cluster(struct fat_driver const *driver, uintptr_t pos)
+{
+	// TODO: implement.
 }
 
 static struct fat_file_desc *

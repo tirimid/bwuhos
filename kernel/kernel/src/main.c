@@ -10,6 +10,7 @@
 #include "pmm.h"
 #include "rtc.h"
 #include "serial_port.h"
+#include "syscall.h"
 #include "vfs.h"
 #include "vmm.h"
 
@@ -66,19 +67,16 @@ init_stage_2(void)
 		ku_println(LT_ERR, "main: no mounted drives!");
 		ku_hang();
 	}
+	isr_syscall_init();
 	
-	// test file read.
-	struct vfs_file file;
-	vfs_open(&file, "1:misc/bwuhos.md", VFF_READ);
-	size_t size;
-	vfs_seek(&file, VW_END, 0);
-	vfs_abs_tell(&file, &size);
-	ku_println(LT_DEBUG, "file is %u bytes long", size);
-	char conts[512] = {0};
-	vfs_seek(&file, VW_START, 0);
-	vfs_rd(&file, conts, size);
-	ku_println(LT_DEBUG, "%s", conts);
-	vfs_close(&file);
+	char const *s = "hello syscall world";
+	__asm__ volatile("\tmov $0x0, %%rax\n"
+	                 "\tmov $0x4, %%rdi\n"
+	                 "\tmov %0, %%rsi\n"
+	                 "\tint $0x80\n"
+	                 :
+	                 : "r"(s)
+	                 : "rax", "rdi", "rsi");
 	
 	ku_hang();
 }

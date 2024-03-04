@@ -34,8 +34,18 @@ then
 fi
 cd ..
 
+echo -e "${ECHO_COLOR}[/] building OS programs\033[0m"
+cd os-prog
+make clean all
+if [ $? -ne 0 ]
+then
+	echo -e "${ECHO_COLOR}[/] OS program build failed\033[0m"
+	exit 1
+fi
+cd ..
+
 echo -e "${ECHO_COLOR}[/] building base filesystem\033[0m"
-mkdir -p root/boot
+mkdir -p root/boot root/bin
 cp \
 	deps/limine/limine-bios-cd.bin \
 	deps/limine/limine-uefi-cd.bin \
@@ -43,6 +53,7 @@ cp \
 	root/boot
 
 cp kernel/kbin root/boot
+cp os-prog/bin/* root/bin
 
 echo -e "${ECHO_COLOR}[/] creating disk image\033[0m"
 dd if=/dev/zero of=bwuhos-fs.img bs=1M count=50 2> /dev/null

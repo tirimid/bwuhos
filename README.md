@@ -19,6 +19,7 @@ Software / system dependencies are:
 * mincbuild (for build)
 * mtools (for build)
 * fs2di (for build)
+* Make (for build)
 * QEmu for execution with `run.sh`
 * GDB for debugging when using `run.sh`
 

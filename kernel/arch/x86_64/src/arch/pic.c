@@ -1,5 +1,7 @@
 #include "arch/pic.h"
 
+#include <stdint.h>
+
 #include "arch/autil.h"
 #include "arch/port.h"
 
