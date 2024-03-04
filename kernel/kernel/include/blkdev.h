@@ -4,11 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "katomic.h"
 #include "kdef.h"
 
 #define BLKDEV_MAX_PARTS 32
-
-// TODO: add mutex locking to protect block devices.
 
 enum blkdev_dev_type {
 	BDT_NULL = 0,
@@ -22,6 +21,7 @@ enum blkdev_driver {
 
 enum blkdev_flag {
 	BF_PART = 0x1,
+	BF_SYNC_DEP_CHILD = 0x2,
 };
 
 struct blkdev {
@@ -44,6 +44,13 @@ struct blkdev {
 	
 	unsigned char dev_type, driver;
 	size_t blk_size, nblk;
+	
+	// partitions check against `parent_mutex` instead of `mutex`.
+	// child devices are assumed to have some amount of independence and
+	// will check against `mutex`, but this will be able to be overriden by
+	// passing `BF_SYNC_DEP_CHILD`.
+	k_mutex_t mutex;
+	k_mutex_t *parent_mutex;
 };
 
 void blkdevs_find(void);

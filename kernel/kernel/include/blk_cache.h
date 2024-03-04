@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "blkdev.h"
+#include "katomic.h"
 #include "kdef.h"
 
 // cached block device reader extension.
@@ -18,6 +19,7 @@ struct blk_cache {
 	struct blkdev *blkdev;
 	uint8_t *buf;
 	blk_addr_t loaded_blk;
+	k_mutex_t mutex;
 };
 
 struct blk_cache blk_cache_create(struct blkdev *blkdev);

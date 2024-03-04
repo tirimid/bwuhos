@@ -10,6 +10,7 @@ blk_cache_create(struct blkdev *blkdev)
 		.blkdev = blkdev,
 		.buf = kheap_alloc(blkdev->blk_size),
 		.loaded_blk = blkdev->nblk,
+		.mutex = 0,
 	};
 }
 
@@ -25,6 +26,8 @@ blk_cache_rd(struct blk_cache *cache, void *dst, uintptr_t addr, size_t n)
 	if (!n)
 		return 0;
 	
+	k_mutex_lock(&cache->mutex);
+	
 	struct blkdev *blkdev = cache->blkdev;
 	
 	blk_addr_t lba_lb = addr / blkdev->blk_size;
@@ -37,22 +40,26 @@ blk_cache_rd(struct blk_cache *cache, void *dst, uintptr_t addr, size_t n)
 		uint8_t *rd_buf = kheap_alloc(blkdev->blk_size * rd_blk_cnt);
 		if (blkdev_rd(blkdev, rd_buf, lba_lb, rd_blk_cnt)) {
 			ku_println(LT_ERR, "buf: failed to read blocks from device (0x%x)!", blkdev);
+			k_mutex_unlock(&cache->mutex);
 			return 1;
 		}
 		
 		ku_memcpy(dst, &rd_buf[byte_addr], n);
 		kheap_free(rd_buf);
+		k_mutex_unlock(&cache->mutex);
 		return 0;
 	}
 	
 	if (lba_lb != cache->loaded_blk) {
 		if (blkdev_rd(blkdev, cache->buf, lba_lb, 1)) {
 			ku_println(LT_ERR, "buf: failed to load new block buffer from device (0x%x)!", blkdev);
+			k_mutex_unlock(&cache->mutex);
 			return 1;
 		}
 		cache->loaded_blk = lba_lb;
 	}
 	
 	ku_memcpy(dst, &cache->buf[byte_addr], n);
+	k_mutex_unlock(&cache->mutex);
 	return 0;
 }

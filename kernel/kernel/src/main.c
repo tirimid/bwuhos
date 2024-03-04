@@ -67,16 +67,10 @@ init_stage_2(void)
 		ku_hang();
 	}
 	
-	// test RTC.
-	struct rtc_time time = rtc_get_time();
-	ku_println(LT_DEBUG, "%u-%u-%u %u:%u:%u", time.year, time.month, time.day, time.hour, time.min, time.sec);
-	
 	// test file read.
 	struct vfs_file file;
-	if (vfs_open(&file, "1:misc/bwuhos.md", VFF_READ)) {
-		ku_println(LT_DEBUG, "main: failed to open test file!");
-		ku_hang();
-	}
+	vfs_open(&file, "1:misc/bwuhos.md", VFF_READ);
+	vfs_close(&file);
 	
 	ku_hang();
 }

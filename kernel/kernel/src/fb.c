@@ -90,9 +90,7 @@ fb_get_best(void)
 struct fb_info const *
 fb_get_all(size_t *out_cnt)
 {
-	if (out_cnt)
-		*out_cnt = fb_cnt;
-	
+	*out_cnt = fb_cnt;
 	return fbs;
 }
 

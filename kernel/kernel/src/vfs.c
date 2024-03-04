@@ -59,6 +59,16 @@ vfs_cnt_mounted(void)
 vfs_drive_id_t
 vfs_mount(struct blkdev *blkdev, enum vfs_fs fs)
 {
+	// prevent mounting the same block device multiple times.
+	// not preventing it would obviously be problematic, e.g. allowing the
+	// user to mount a single drive using multiple filesystem drivers, which
+	// might cause the disk data to get a little fucky wucky.
+	// can check for device mount by ensuring that it has FS type null.
+	if (vfs_get_mount_fs(blkdev) != VF_NULL) {
+		ku_println(LT_ERR, "vfs: cannot multi-mount a single block device (0x%x)!", blkdev);
+		return VFS_DRIVE_ID_NULL;
+	}
+	
 	vfs_drive_id_t slot_id;
 	struct drive *slot = find_slot(&slot_id);
 	if (!slot) {
@@ -95,6 +105,17 @@ void
 vfs_unmount(vfs_drive_id_t id)
 {
 	// TODO: implement.
+}
+
+enum vfs_fs
+vfs_get_mount_fs(struct blkdev const *blkdev)
+{
+	for (size_t i = 0; i < sizeof(drives) / sizeof(drives[0]); ++i) {
+		if (drives[i].flags & DF_MOUNTED && drives[i].blkdev == blkdev)
+			return drives[i].fs;
+	}
+	
+	return VF_NULL;
 }
 
 int
@@ -152,22 +173,78 @@ vfs_open(struct vfs_file *out, char const *path, uint8_t flags)
 	return 0;
 }
 
-void
+int
 vfs_close(struct vfs_file *file)
 {
-	// TODO: implement.
+	if (!file->file) {
+		ku_println(LT_ERR, "vfs: cannot close null FID!");
+		return 1;
+	}
+	
+	struct vfs_fs_driver *driver = &drives[file->drive - 1].driver;
+	
+	if (!driver->is_open(driver, file->file)) {
+		ku_println(LT_ERR, "vfs: cannot close unopened FID - %u!", file->file);
+		return 1;
+	}
+	
+	if (driver->close(driver, file->file)) {
+		ku_println(LT_ERR, "vfs: FS driver failed to close FID - %u!", file->file);
+		return 1;
+	}
+	
+	return 0;
 }
 
-size_t
-vfs_abs_tell(struct vfs_file const *file)
+int
+vfs_abs_tell(struct vfs_file const *file, size_t *out_pos)
 {
-	// TODO: implement.
+	if (!file->file) {
+		ku_println(LT_ERR, "vfs: cannot abs_tell null FID!");
+		return 1;
+	}
+	
+	struct vfs_fs_driver *driver = &drives[file->drive - 1].driver;
+	
+	if (!driver->is_open(driver, file->file)) {
+		ku_println(LT_ERR, "vfs: cannot abs_tell unopened FID - %u!", file->file);
+		return 1;
+	}
+	
+	if (driver->abs_tell(driver, file->file, out_pos)) {
+		ku_println(LT_ERR, "vfs: FS driver failed to abs_tell FID - %u!", file->file);
+		return 1;
+	}
+	
+	return 0;
 }
 
 int
 vfs_seek(struct vfs_file *file, enum vfs_whence whence, long long off)
 {
-	// TODO: implement.
+	if (!file->file) {
+		ku_println(LT_ERR, "vfs: cannot seek null FID!");
+		return 1;
+	}
+	
+	if (whence != VW_SET && whence != VW_CUR && whence != VW_END) {
+		ku_println(LT_ERR, "vfs: tried to seek with invalid whence - %u!", whence);
+		return 1;
+	}
+	
+	struct vfs_fs_driver *driver = &drives[file->drive - 1].driver;
+	
+	if (!driver->is_open(driver, file->file)) {
+		ku_println(LT_ERR, "vfs: cannot seek unopened FID - %u!", file->file);
+		return 1;
+	}
+	
+	if (driver->seek(driver, file->file, whence, off)) {
+		ku_println(LT_ERR, "vfs: FS driver failed to seek FID - %u!", file->file);
+		return 1;
+	}
+	
+	return 0;
 }
 
 int

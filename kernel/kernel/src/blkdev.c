@@ -23,6 +23,8 @@ static struct blkdev blkdevs[MAX_BLKDEV_CNT] = {
 		.driver = BD_NULL,
 		.blk_size = 0,
 		.nblk = 0,
+		.mutex = 0,
+		.parent_mutex = NULL,
 	},
 };
 static size_t blkdev_cnt;
@@ -112,24 +114,34 @@ blkdev_create(void *driver_data, void (*driver_destroy)(void *),
 		.driver = driver,
 		.blk_size = blk_size,
 		.nblk = nblk,
+		.mutex = 0,
+		.parent_mutex = NULL,
 	};
 }
 
 struct blkdev *
 blkdev_mk_part(struct blkdev *blkdev, blk_addr_t base, size_t limit)
 {
-	if (blkdev->nchildren >= BLKDEV_MAX_PARTS) {
-		ku_println(LT_ERR, "blkdev: block device (0x%x) already has max partitions!", blkdev);
-		return NULL;
-	}
-	
 	if (blkdev->flags & BF_PART) {
 		ku_println(LT_ERR, "blkdev: cannot create sub-partition of partition (0x%x)!", blkdev);
 		return NULL;
 	}
 	
+	k_mutex_t *mutex = &blkdev->mutex;
+	if (blkdev->flags & BF_SYNC_DEP_CHILD)
+		mutex = blkdev->parent_mutex;
+	
+	k_mutex_lock(mutex);
+	
+	if (blkdev->nchildren >= BLKDEV_MAX_PARTS) {
+		ku_println(LT_ERR, "blkdev: block device (0x%x) already has max partitions!", blkdev);
+		k_mutex_unlock(mutex);
+		return NULL;
+	}
+	
 	if (base + limit > blkdev->nblk) {
 		ku_println(LT_ERR, "blkdev: base + limit of partition would exceed block device (0x%x) - 0x%x>0x%x!", blkdev, base + limit, blkdev->nblk);
+		k_mutex_unlock(mutex);
 		return NULL;
 	}
 	
@@ -146,11 +158,13 @@ blkdev_mk_part(struct blkdev *blkdev, blk_addr_t base, size_t limit)
 		.driver = blkdev->driver,
 		.blk_size = blkdev->blk_size,
 		.nblk = limit,
+		.parent_mutex = mutex,
 	};
 	
 	++blkdev->nchildren;
 	blkdev->children[blkdev->nchildren - 1] = part;
 	ku_println(LT_INFO, "blkdev: partitioned block device (0x%x) -> {0x%x..+0x%x}", blkdev, part.part_base, part.nblk);
+	k_mutex_unlock(mutex);
 	return &blkdev->children[blkdev->nchildren - 1];
 }
 
@@ -186,8 +200,15 @@ blkdev_destroy(struct blkdev *blkdev)
 int
 blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n)
 {
+	k_mutex_t *mutex = &blkdev->mutex;
+	if (blkdev->flags & BF_PART || blkdev->flags & BF_SYNC_DEP_CHILD)
+		mutex = blkdev->parent_mutex;
+	
+	k_mutex_lock(mutex);
+	
 	if (src + n > blkdev->nblk) {
 		ku_println(LT_ERR, "blkdev: base + limit of read would exceed block device (0x%x) - 0x%x>0x%x!", blkdev, src + n, blkdev->nblk);
+		k_mutex_unlock(mutex);
 		return 1;
 	}
 	
@@ -196,14 +217,22 @@ blkdev_rd(struct blkdev *blkdev, void *dst, blk_addr_t src, size_t n)
 	else
 		blkdev->rd(blkdev, dst, src, n);
 	
+	k_mutex_unlock(mutex);
 	return 0;
 }
 
 int
 blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src, size_t n)
 {
+	k_mutex_t *mutex = &blkdev->mutex;
+	if (blkdev->flags & BF_PART || blkdev->flags & BF_SYNC_DEP_CHILD)
+		mutex = blkdev->parent_mutex;
+	
+	k_mutex_lock(mutex);
+	
 	if (dst + n > blkdev->nblk) {
 		ku_println(LT_ERR, "blkdev: base + limit of write would exceed block device (0x%x) - 0x%x>0x%x!", blkdev, dst + n, blkdev->nblk);
+		k_mutex_unlock(mutex);
 		return 1;
 	}
 	
@@ -212,6 +241,7 @@ blkdev_wr(struct blkdev *blkdev, blk_addr_t dst, void const *src, size_t n)
 	else
 		blkdev->wr(blkdev, dst, src, n);
 	
+	k_mutex_unlock(mutex);
 	return 0;
 }
 
