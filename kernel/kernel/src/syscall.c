@@ -10,8 +10,23 @@
 // set OR* by writing the OR* `args` fields passed into the syscall.
 // the ISR definition macro must use this to communicate with the caller.
 
+struct sc_args {
+	// refer to `docs/syscalls.md` for argument register meanings.
+	uint64_t arsel;
+	uint64_t ar0, ar1, ar2, ar3, ar4, ar5, ar6, ar7;
+	uint64_t or0, or1, or2, or3;
+} __attribute__((packed));
+
+void isr_syscall_head(void);
+void isr_syscall_body(struct sc_args *args);
+
+static void sc_dbg_println(struct sc_args *args);
+static void sc_prog_term(struct sc_args *args);
+static void sc_gfx_fb_req_best(struct sc_args *args);
+static void sc_gfx_fb_put_pixel(struct sc_args *args);
+
 void
-isr_syscall_init(void)
+syscall_init(void)
 {
 	ku_println(LT_INFO, "syscall: installing ISR");
 	
@@ -22,47 +37,47 @@ isr_syscall_init(void)
 }
 
 void
-isr_syscall_body(struct syscall_args *args)
+isr_syscall_body(struct sc_args *args)
 {
 	// refer to `docs/syscalls.md` for selection numbers.
 	switch (args->arsel) {
 	case 0x0:
-		syscall_dbg_println(args);
+		sc_dbg_println(args);
 		break;
 	case 0x20:
-		syscall_prog_term(args);
+		sc_prog_term(args);
 		break;
 	case 0x100:
-		syscall_gfx_fb_req_best(args);
+		sc_gfx_fb_req_best(args);
 		break;
 	case 0x140:
-		syscall_gfx_fb_put_pixel(args);
+		sc_gfx_fb_put_pixel(args);
 		break;
 	}
 }
 
-void
-syscall_dbg_println(struct syscall_args *args)
+static void
+sc_dbg_println(struct sc_args *args)
 {
 	ku_println(args->ar0, "%s", args->ar1);
 }
 
-void
-syscall_prog_term(struct syscall_args *args)
+static void
+sc_prog_term(struct sc_args *args)
 {
 	// TODO: implement when scheduler exists.
 	
 	ku_hang();
 }
 
-void
-syscall_gfx_fb_req_best(struct syscall_args *args)
+static void
+sc_gfx_fb_req_best(struct sc_args *args)
 {
 	args->or0 = fb_get_id(fb_get_best());
 }
 
-void
-syscall_gfx_fb_put_pixel(struct syscall_args *args)
+static void
+sc_gfx_fb_put_pixel(struct sc_args *args)
 {
 	args->or0 = fb_put_pixel(args->ar0, args->ar1, args->ar2, args->ar3,
 	                         args->ar4, args->ar5);

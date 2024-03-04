@@ -67,16 +67,7 @@ init_stage_2(void)
 		ku_println(LT_ERR, "main: no mounted drives!");
 		ku_hang();
 	}
-	isr_syscall_init();
-	
-	char const *s = "hello syscall world";
-	__asm__ volatile("\tmov $0x0, %%rax\n"
-	                 "\tmov $0x4, %%rdi\n"
-	                 "\tmov %0, %%rsi\n"
-	                 "\tint $0x80\n"
-	                 :
-	                 : "r"(s)
-	                 : "rax", "rdi", "rsi");
+	syscall_init();
 	
 	ku_hang();
 }

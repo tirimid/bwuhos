@@ -5,6 +5,7 @@
 
 #include "kdef.h"
 
+// assume all arches will define their own `page_map_t` here.
 #if defined(K_ARCH_X86_64)
 typedef phys_addr_t page_map_t;
 #endif
