@@ -1,6 +1,5 @@
 #include "syscall.h"
 
-#include "fb.h"
 #include "kutil.h"
 
 #if defined(K_ARCH_X86_64)
@@ -22,8 +21,6 @@ void isr_syscall_body(struct sc_args *args);
 
 static void sc_dbg_println(struct sc_args *args);
 static void sc_prog_term(struct sc_args *args);
-static void sc_gfx_fb_req_best(struct sc_args *args);
-static void sc_gfx_fb_put_pixel(struct sc_args *args);
 
 void
 syscall_init(void)
@@ -47,12 +44,6 @@ isr_syscall_body(struct sc_args *args)
 	case 0x20:
 		sc_prog_term(args);
 		break;
-	case 0x100:
-		sc_gfx_fb_req_best(args);
-		break;
-	case 0x140:
-		sc_gfx_fb_put_pixel(args);
-		break;
 	}
 }
 
@@ -66,19 +57,4 @@ static void
 sc_prog_term(struct sc_args *args)
 {
 	// TODO: implement when scheduler exists.
-	
-	ku_hang();
-}
-
-static void
-sc_gfx_fb_req_best(struct sc_args *args)
-{
-	args->or0 = fb_get_id(fb_get_best());
-}
-
-static void
-sc_gfx_fb_put_pixel(struct sc_args *args)
-{
-	args->or0 = fb_put_pixel(args->ar0, args->ar1, args->ar2, args->ar3,
-	                         args->ar4, args->ar5);
 }

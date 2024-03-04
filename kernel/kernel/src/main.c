@@ -2,7 +2,6 @@
 
 #include "arch/arch_master.h"
 #include "blkdev.h"
-#include "fb.h"
 #include "kutil.h"
 #include "kheap.h"
 #include "mbr.h"
@@ -31,8 +30,6 @@ _start(void)
 	ku_println(LT_INFO, "main: beginning post-serial-port init");
 	
 	rtc_init();
-	if (fb_init())
-		ku_hang();
 	if (meml_init())
 		ku_hang();
 	pmm_init();

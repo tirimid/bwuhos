@@ -39,17 +39,4 @@ selection number must be loaded into ARSEL.
   * AR1 = Pointer to the null-terminated text buffer
 * 0x20 : `PROG_TERM`
   * Request to be removed from scheduling and freed
-  * AR0 = termination code
-* 0x100 : `GFX_FB_REQ_BEST`
-  * Request the ID of the "best" framebuffer as judged by the kernel, for
-    software rendering
-  * OR0 = ID of the best framebuffer
-* 0x140 : `GFX_FB_PUT_PIXEL`
-  * Use the kernel to software-render a pixel onto a framebuffer
-  * AR0 = ID of the target framebuffer
-  * AR1 = X coordinate of the pixel to draw
-  * AR2 = Y coordinate of the pixel to draw
-  * AR3 = Red component of color
-  * AR4 = Green component of color
-  * AR5 = Blue component of color
-  * OR0 = 0 if success
+  * AR0 = Termination code
