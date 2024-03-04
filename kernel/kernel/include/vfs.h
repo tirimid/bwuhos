@@ -24,7 +24,7 @@ enum vfs_fs {
 };
 
 enum vfs_whence {
-	VW_SET,
+	VW_START,
 	VW_CUR,
 	VW_END,
 };
@@ -52,8 +52,8 @@ struct vfs_fs_driver {
 	int (*close)(struct vfs_fs_driver *, vfs_file_id_t);
 	int (*abs_tell)(struct vfs_fs_driver *, vfs_file_id_t, size_t *);
 	int (*seek)(struct vfs_fs_driver *, vfs_file_id_t, enum vfs_whence, long long);
-	int (*rd)(struct vfs_fs_driver *, vfs_file_id_t, uint8_t *dst, size_t n);
-	int (*wr)(struct vfs_fs_driver *, vfs_file_id_t, uint8_t const *src, size_t n);
+	int (*rd)(struct vfs_fs_driver *, vfs_file_id_t, void *dst, size_t n);
+	int (*wr)(struct vfs_fs_driver *, vfs_file_id_t, void const *src, size_t n);
 };
 
 void vfs_auto_mount(void);
@@ -67,7 +67,7 @@ int vfs_open(struct vfs_file *out, char const *path, uint8_t flags);
 int vfs_close(struct vfs_file *file);
 int vfs_abs_tell(struct vfs_file const *file, size_t *out_pos);
 int vfs_seek(struct vfs_file *file, enum vfs_whence whence, long long off);
-int vfs_rd(struct vfs_file *file, uint8_t *dst, size_t n);
-int vfs_wr(struct vfs_file *file, uint8_t const *src, size_t n);
+int vfs_rd(struct vfs_file *file, void *dst, size_t n);
+int vfs_wr(struct vfs_file *file, void const *src, size_t n);
 
 #endif

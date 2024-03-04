@@ -3,6 +3,8 @@
 #include "kheap.h"
 #include "kutil.h"
 
+// TODO: make read / locate operations work across FAT cluster boundaries.
+
 struct bpb {
 	uint8_t jmp[3];
 	char oem_id[8];
@@ -446,23 +448,21 @@ fat_vfs_seek(struct vfs_fs_driver *driver, vfs_file_id_t fid,
 	struct fat_driver *dv = driver->driver_data;
 	struct fat_file_desc *fd = &dv->file_descs[fid - 1];
 	
-	size_t clamp_ub = fd->size > 0 ? fd->size - 1 : 0;
-	
 	switch (whence) {
-	case VW_SET:
+	case VW_START:
 		off = off < 0 ? 0 : off;
-		off = off > clamp_ub ? clamp_ub : off;
+		off = off > fd->size ? fd->size : off;
 		fd->file_pos = off;
 		break;
 	case VW_CUR:
 		off = off < -(long long)fd->file_pos ? -(long long)fd->file_pos : off;
-		off = off > clamp_ub - fd->file_pos ? clamp_ub - fd->file_pos : off;
+		off = off > fd->size - fd->file_pos ? fd->size - fd->file_pos : off;
 		fd->file_pos += off;
 		break;
 	case VW_END:
-		off = off < -(long long)clamp_ub ? -(long long)clamp_ub : off;
+		off = off < -(long long)fd->size ? -(long long)fd->size : off;
 		off = off > 0 ? 0 : off;
-		fd->file_pos = clamp_ub + off;
+		fd->file_pos = fd->size + off;
 		break;
 	}
 	
@@ -470,14 +470,32 @@ fat_vfs_seek(struct vfs_fs_driver *driver, vfs_file_id_t fid,
 }
 
 int
-fat_vfs_rd(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t *dst,
-           size_t n)
+fat_vfs_rd(struct vfs_fs_driver *driver, vfs_file_id_t fid, void *dst, size_t n)
 {
-	// TODO: implement.
+	struct fat_driver *dv = driver->driver_data;
+	struct fat_file_desc const *fd = &dv->file_descs[fid - 1];
+	
+	if (fd->file_pos >= fd->size) {
+		ku_println(LT_ERR, "fat: cannot read FID due to EOF - %u!", fid);
+		return 1;
+	}
+	
+	if (fd->file_pos + n > fd->size) {
+		ku_println(LT_ERR, "fat: FID read would exceed file bounds (%u>%u) - %u!", fd->file_pos + n, fd->size, fid);
+		return 1;
+	}
+	
+	uintptr_t rd_pos = cluster_to_pos(dv, fd->cluster) + fd->file_pos;
+	if (blk_cache_rd(&dv->blk_cache, dst, rd_pos, n)) {
+		ku_println(LT_ERR, "fat: failed to read block cache!");
+		return 1;
+	}
+	
+	return 0;
 }
 
 int
-fat_vfs_wr(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t const *src,
+fat_vfs_wr(struct vfs_fs_driver *driver, vfs_file_id_t fid, void const *src,
            size_t n)
 {
 	// TODO: implement.

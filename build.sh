@@ -49,4 +49,5 @@ dd if=/dev/zero of=bwuhos-fs.img bs=1M count=50 2> /dev/null
 mformat -i bwuhos-fs.img ::
 mcopy -i bwuhos-fs.img root/* ::
 fs2di --out=bwuhos.img bwuhos-fs.img boot 6
+
 ./deps/limine/limine bios-install bwuhos.img --quiet

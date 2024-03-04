@@ -152,7 +152,7 @@ ku_memset(void *dst, uint8_t b, size_t n)
 	q |= (uint64_t)b << 56;
 	
 	au_fms_64(dst, q, n / 8);
-	for (size_t i = n - n % 3; i < n; ++i)
+	for (size_t i = n / 8 * 8; i < n; ++i)
 		*((uint8_t *)dst + i) = b;
 #endif
 }
@@ -160,9 +160,11 @@ ku_memset(void *dst, uint8_t b, size_t n)
 void
 ku_memcpy(void *dst, void const *src, size_t n)
 {
-	// TODO: CPU efficient implementation using string operations.
-	for (size_t i = 0; i < n; ++i)
+#if defined(K_ARCH_X86_64)
+	au_fmc_64(dst, src, n / 8);
+	for (size_t i = n / 8 * 8; i < n; ++i)
 		*((uint8_t *)dst + i) = *((uint8_t *)src + i);
+#endif
 }
 
 static void

@@ -70,6 +70,14 @@ init_stage_2(void)
 	// test file read.
 	struct vfs_file file;
 	vfs_open(&file, "1:misc/bwuhos.md", VFF_READ);
+	size_t size;
+	vfs_seek(&file, VW_END, 0);
+	vfs_abs_tell(&file, &size);
+	ku_println(LT_DEBUG, "file is %u bytes long", size);
+	char conts[512] = {0};
+	vfs_seek(&file, VW_START, 0);
+	vfs_rd(&file, conts, size);
+	ku_println(LT_DEBUG, "%s", conts);
 	vfs_close(&file);
 	
 	ku_hang();

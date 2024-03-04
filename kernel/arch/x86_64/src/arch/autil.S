@@ -14,4 +14,10 @@ au_fms_64:
 	rep stosq
 	ret
 	
+	.global au_fmc_64
+au_fmc_64:
+	mov rcx, rdx
+	rep movsq
+	ret
+	
 	.endif

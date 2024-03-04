@@ -88,7 +88,7 @@ vfs_file_id_t fat_vfs_open(struct vfs_fs_driver *driver, char const *path, uint8
 int fat_vfs_close(struct vfs_fs_driver *driver, vfs_file_id_t fid);
 int fat_vfs_abs_tell(struct vfs_fs_driver *driver, vfs_file_id_t fid, size_t *out);
 int fat_vfs_seek(struct vfs_fs_driver *driver, vfs_file_id_t fid, enum vfs_whence whence, long long off);
-int fat_vfs_rd(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t *dst, size_t n);
-int fat_vfs_wr(struct vfs_fs_driver *driver, vfs_file_id_t fid, uint8_t const *src, size_t n);
+int fat_vfs_rd(struct vfs_fs_driver *driver, vfs_file_id_t fid, void *dst, size_t n);
+int fat_vfs_wr(struct vfs_fs_driver *driver, vfs_file_id_t fid, void const *src, size_t n);
 
 #endif

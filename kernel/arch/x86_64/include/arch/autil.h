@@ -12,4 +12,7 @@ void au_println(enum log_type type, char const *msg, ...);
 // fast memset using string operations.
 void au_fms_64(void *dst, uint64_t q, size_t n);
 
+// fast memcpy using string operations.
+void au_fmc_64(void *dst, void const *src, size_t n);
+
 #endif
